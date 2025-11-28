@@ -366,3 +366,87 @@ body {
     /* 移除 flex: 1 和 overflow-y: auto，因为现在父级 modal-body 负责滚动 */
 }
 .view-meta { font-size: 12px; color: #9ca3af; margin-bottom: 15px; display: flex; gap: 15px; }
+
+/* --- 分类管理专用样式 (新增) --- */
+.cat-list { 
+    flex: 1; 
+    overflow-y: auto; 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    background: #f9fafb; 
+    padding: 12px; 
+}
+
+.cat-item { 
+    background: white; 
+    border: 1px solid var(--border); 
+    margin-bottom: 8px; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    transition: all 0.2s;
+}
+
+.cat-header { 
+    display: flex; 
+    align-items: center; 
+    padding: 10px 16px; 
+    gap: 10px; 
+    background: #fff; 
+}
+.cat-header:hover { background: #f8fafc; }
+
+/* 拖拽手柄 */
+.cat-drag-handle { 
+    cursor: grab; 
+    color: #d1d5db; 
+    font-size: 18px; 
+    line-height: 1;
+    padding: 4px;
+}
+.cat-drag-handle:active { cursor: grabbing; color: var(--primary); }
+
+.cat-name { 
+    flex: 1; 
+    font-weight: 600; 
+    font-size: 14px; 
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 操作按钮区域 */
+.cat-actions { 
+    display: flex; 
+    gap: 4px; 
+    opacity: 0; /* 默认隐藏，鼠标悬停显示 */
+    transition: opacity 0.2s; 
+}
+.cat-header:hover .cat-actions, 
+.sub-item:hover .cat-actions { 
+    opacity: 1; 
+}
+
+/* 二级分类列表 */
+.sub-list { 
+    border-top: 1px solid #f3f4f6; 
+    background: #f9fafb;
+}
+
+.sub-item { 
+    display: flex; 
+    align-items: center; 
+    padding: 8px 16px 8px 42px; /* 增加左缩进 */
+    gap: 10px; 
+    border-top: 1px solid white; 
+    font-size: 13px; 
+    color: #4b5563;
+}
+.sub-item:first-child { border-top: none; }
+.sub-item:hover { background: #eff6ff; }
+
+/* 拖拽时的样式 */
+.dragging-over {
+    border: 2px dashed var(--primary);
+    background: #eff6ff;
+}

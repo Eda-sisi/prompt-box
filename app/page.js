@@ -181,7 +181,44 @@ export default function Home() {
     })
     return list
   }
+// --- 新增：拖拽逻辑 ---
+  const [dragItem, setDragItem] = useState(null) // { type: 'root'|'child', index: number, parentId: string }
 
+  const handleDragStart = (e, item) => {
+    setDragItem(item)
+    e.dataTransfer.effectAllowed = 'move'
+    // 只有点击手柄时才允许拖拽 (通过样式控制或逻辑判断，这里简化处理)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault() // 必须阻止默认行为才能 Drop
+  }
+
+  const handleDrop = (e, targetItem) => {
+    e.preventDefault()
+    if (!dragItem || dragItem.type !== targetItem.type) return // 只能同级拖拽
+    if (dragItem.parentId !== targetItem.parentId) return // 只能在同一个父级内排序
+
+    const newCats = JSON.parse(JSON.stringify(categories))
+    
+    if (dragItem.type === 'root') {
+      // 一级菜单排序
+      const itemToMove = newCats[dragItem.index]
+      newCats.splice(dragItem.index, 1)
+      newCats.splice(targetItem.index, 0, itemToMove)
+    } else {
+      // 二级菜单排序
+      const parent = newCats.find(c => c.id === dragItem.parentId)
+      if (parent) {
+        const itemToMove = parent.children[dragItem.index]
+        parent.children.splice(dragItem.index, 1)
+        parent.children.splice(targetItem.index, 0, itemToMove)
+      }
+    }
+    
+    saveCategoriesToCloud(newCats)
+    setDragItem(null)
+  }
   const handleInputConfirm = () => {
     const val = inputState.value.trim()
     if (!val) return alert('不能为空')
