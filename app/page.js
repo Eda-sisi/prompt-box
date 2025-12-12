@@ -94,6 +94,23 @@ export default function Home() {
     if (data) setUsersList(data)
   }
 
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('⚠️ 高危操作：确定要移除该用户吗？\n这将同时删除该用户的所有提示词数据！')) return
+    
+    // 1. 先删该用户的提示词 (因为有外键关联，或者数据库级联删除)
+    await supabase.from('prompts').delete().eq('user_id', userId)
+    
+    // 2. 再删用户档案
+    const { error } = await supabase.from('profiles').delete().eq('id', userId)
+    
+    if (error) {
+      alert('删除失败: ' + error.message)
+    } else {
+      alert('用户已移除')
+      fetchUsers() // 刷新列表
+    }
+  }
+
   // --- 业务逻辑 ---
   const saveCategoriesToCloud = async (newCats) => {
     setCategories(newCats)
@@ -143,15 +160,36 @@ export default function Home() {
   }
 
   // --- 辅助逻辑 ---
-  const getFilteredPrompts = () => {
+const getFilteredPrompts = () => {
     let list = prompts.filter(p => {
-      // 在首页或列表页，如果选了特定分类，就筛选；如果是'all'，就显示全部
-      const matchCat = selectedId === 'all' || p.category_id === selectedId
+      // 1. 核心修改：智能分类匹配
+      let matchCat = false
+      
+      if (selectedId === 'all') {
+        matchCat = true
+      } else {
+        // 检查 selectedId 是否是一级分类
+        const rootCat = categories.find(c => c.id === selectedId)
+        
+        if (rootCat) {
+          // A. 如果选中的是一级分类：
+          // 只要提示词的 category_id 等于一级分类 ID，或者属于其下的任意子分类 ID，都算匹配
+          const childIds = rootCat.children?.map(child => child.id) || []
+          matchCat = p.category_id === selectedId || childIds.includes(p.category_id)
+        } else {
+          // B. 如果选中的是二级分类：必须精确匹配
+          matchCat = p.category_id === selectedId
+        }
+      }
+
+      // 2. 搜索匹配 (保持不变)
       const searchLower = searchQuery.toLowerCase()
       const matchSearch = (p.title + p.content + (p.desc || '')).toLowerCase().includes(searchLower)
+      
       return matchCat && matchSearch
     })
-    // 排序
+
+    // 3. 排序 (保持不变)
     list.sort((a, b) => {
       const tA = new Date(a.updated_at).getTime()
       const tB = new Date(b.updated_at).getTime()
@@ -161,6 +199,7 @@ export default function Home() {
       if (sortType === 'name_desc') return b.title.localeCompare(a.title, 'zh')
       return 0
     })
+    
     return list
   }
   
@@ -242,7 +281,13 @@ export default function Home() {
                         </td>
                         <td>
                             {/* 这里暂时只做展示，真实删除需要 Auth API 支持 */}
-                            <button className="btn-small" disabled style={{opacity:0.5, cursor:'not-allowed'}}>管理</button>
+                            <button 
+                              className="btn-small" 
+                              style={{color: 'red', borderColor: '#fee2e2', background: '#fef2f2'}}
+                              onClick={() => handleDeleteUser(u.id)}
+                            >
+                              删除
+                            </button>
                         </td>
                     </tr>
                 ))}
@@ -374,10 +419,48 @@ export default function Home() {
             const isExpanded = expandedCats[cat.id] || hasActiveChild
             return (
               <div key={cat.id}>
-                <div className="menu-item" onClick={() => setExpandedCats(prev => ({...prev, [cat.id]: !prev[cat.id]}))}>
-                  <div style={{display:'flex', gap:'8px'}}><span>{cat.icon || '📂'}</span> {cat.name}</div>
-                  <span style={{fontSize:'10px', color:'#ccc'}}>{isExpanded ? '▼' : '▶'}</span>
-                </div>
+                  {categories.map(cat => {
+                              const hasActiveChild = cat.children?.some(child => child.id === selectedId)
+                              // 修改：如果当前选中的是一级分类本身，也保持展开状态
+                              const isExpanded = expandedCats[cat.id] || hasActiveChild || selectedId === cat.id 
+                              
+                              return (
+                                <div key={cat.id}>
+                                  {/* 👇 修改开始：点击一级菜单时，同时执行选中 + 切换视图 + 展开/收起 👇 */}
+                                  <div 
+                                    className={`menu-item ${selectedId === cat.id ? 'active' : ''}`} 
+                                    onClick={() => { 
+                                      setSelectedId(cat.id); 
+                                      setViewMode('list'); 
+                                      setExpandedCats(prev => ({...prev, [cat.id]: !prev[cat.id]})) 
+                                    }}
+                                  >
+                                    <div style={{display:'flex', gap:'8px'}}>
+                                      <span>{cat.icon || '📂'}</span> {cat.name}
+                                    </div>
+                                    <span style={{fontSize:'10px', color:'#ccc'}}>{isExpanded ? '▼' : '▶'}</span>
+                                  </div>
+                                  {/* 👆 修改结束 👆 */}
+
+                                  {isExpanded && (
+                                    <div className="submenu">
+                                      {cat.children?.map(child => (
+                                        <div key={child.id} 
+                                            className={`submenu-item ${selectedId === child.id ? 'active' : ''}`}
+                                            onClick={(e) => { 
+                                              e.stopPropagation(); // 防止冒泡
+                                              setSelectedId(child.id); 
+                                              setViewMode('list') 
+                                            }}
+                                        >
+                                          {child.name}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
                 {isExpanded && (
                   <div className="submenu">
                     {cat.children?.map(child => (
