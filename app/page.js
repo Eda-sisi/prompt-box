@@ -1,11 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react' // 已移除 useRef
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 // --- 图标组件 ---
 const Icon = {
-  Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+  Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
   Search: <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
   Plus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
   Edit: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
@@ -62,7 +62,7 @@ export default function Home() {
       const currentUser = session.user
       setUser(currentUser)
 
-      // 1. 检查是否是管理员 (查询 profiles 表)
+      // 1. 检查是否是管理员
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
       if (profile && profile.role === 'admin') {
         setIsAdmin(true)
@@ -97,7 +97,7 @@ export default function Home() {
   const handleDeleteUser = async (userId) => {
     if (!confirm('⚠️ 高危操作：确定要移除该用户吗？\n这将同时删除该用户的所有提示词数据！')) return
     
-    // 1. 先删该用户的提示词 (因为有外键关联，或者数据库级联删除)
+    // 1. 先删该用户的提示词
     await supabase.from('prompts').delete().eq('user_id', userId)
     
     // 2. 再删用户档案
@@ -111,7 +111,32 @@ export default function Home() {
     }
   }
 
-  // --- 业务逻辑 ---
+  // --- 新增：切换用户角色 (提权/降级) ---
+  const handleToggleAdmin = async (userId, currentRole) => {
+    // 防止取消自己的管理员权限（把自己锁在外面）
+    if (userId === user.id) {
+      return alert("操作禁止：你不能取消自己的管理员权限！");
+    }
+
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    const actionName = newRole === 'admin' ? '设为管理员' : '降级为普通用户';
+
+    if (!confirm(`确定要将该用户 ${actionName} 吗？`)) return;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('id', userId);
+
+    if (error) {
+      alert("操作失败: " + error.message);
+    } else {
+      alert("操作成功！");
+      fetchUsers(); // 刷新列表，看到最新状态
+    }
+  };
+
+  // --- 业务逻辑：保存分类 ---
   const saveCategoriesToCloud = async (newCats) => {
     setCategories(newCats)
     if (catRecordId) {
@@ -122,6 +147,7 @@ export default function Home() {
     }
   }
 
+  // --- 业务逻辑：提示词增删改 ---
   const handleSavePrompt = async () => {
     if (!editingPrompt.title || !editingPrompt.content) return alert('标题和内容不能为空')
     let tagsArr = []
@@ -160,36 +186,32 @@ export default function Home() {
   }
 
   // --- 辅助逻辑 ---
-const getFilteredPrompts = () => {
+  const getFilteredPrompts = () => {
     let list = prompts.filter(p => {
-      // 1. 核心修改：智能分类匹配
+      // 智能分类匹配 (支持点击父级显示所有子级)
       let matchCat = false
-      
       if (selectedId === 'all') {
         matchCat = true
       } else {
-        // 检查 selectedId 是否是一级分类
         const rootCat = categories.find(c => c.id === selectedId)
-        
         if (rootCat) {
-          // A. 如果选中的是一级分类：
-          // 只要提示词的 category_id 等于一级分类 ID，或者属于其下的任意子分类 ID，都算匹配
+          // 选中一级分类：匹配自己 或 子分类
           const childIds = rootCat.children?.map(child => child.id) || []
           matchCat = p.category_id === selectedId || childIds.includes(p.category_id)
         } else {
-          // B. 如果选中的是二级分类：必须精确匹配
+          // 选中二级分类：精确匹配
           matchCat = p.category_id === selectedId
         }
       }
 
-      // 2. 搜索匹配 (保持不变)
+      // 搜索匹配
       const searchLower = searchQuery.toLowerCase()
       const matchSearch = (p.title + p.content + (p.desc || '')).toLowerCase().includes(searchLower)
       
       return matchCat && matchSearch
     })
 
-    // 3. 排序 (保持不变)
+    // 排序
     list.sort((a, b) => {
       const tA = new Date(a.updated_at).getTime()
       const tB = new Date(b.updated_at).getTime()
@@ -227,18 +249,14 @@ const getFilteredPrompts = () => {
 
         {/* 一级分类卡片 */}
         {categories.map(cat => {
-            // 计算该一级分类下所有子分类的提示词总和
             let count = 0;
-            cat.children.forEach(sub => {
-                count += getCategoryCount(sub.id)
-            })
-            // 还有可能直接挂在一级分类下（如果有这种逻辑的话）
+            cat.children.forEach(sub => { count += getCategoryCount(sub.id) })
             count += getCategoryCount(cat.id)
 
             return (
                 <div key={cat.id} className="stack-card" onClick={() => { 
-                    setSelectedId(cat.children?.[0]?.id || cat.id); // 默认跳到第一个子分类
-                    setExpandedCats(prev => ({...prev, [cat.id]: true})); // 展开侧边栏
+                    setSelectedId(cat.children?.[0]?.id || cat.id); 
+                    setExpandedCats(prev => ({...prev, [cat.id]: true})); 
                     setViewMode('list');
                 }}>
                     <div className="stack-icon">{cat.icon || '📂'}</div>
@@ -279,8 +297,21 @@ const getFilteredPrompts = () => {
                                 {u.role === 'admin' ? '管理员' : '普通用户'}
                             </span>
                         </td>
-                        <td>
-                            {/* 这里暂时只做展示，真实删除需要 Auth API 支持 */}
+                        <td style={{display:'flex', gap:'10px'}}>
+                            {/* 👇👇👇 新增：切换角色按钮 👇👇👇 */}
+                            <button 
+                              className="btn-small" 
+                              style={{
+                                color: u.role === 'admin' ? '#d97706' : '#2563eb', // 管理员显示橙色，普通用户显示蓝色
+                                borderColor: u.role === 'admin' ? '#fcd34d' : '#bfdbfe',
+                                background: u.role === 'admin' ? '#fffbeb' : '#eff6ff'
+                              }}
+                              onClick={() => handleToggleAdmin(u.id, u.role)}
+                            >
+                              {u.role === 'admin' ? '降级' : '提权'}
+                            </button>
+                            {/* 👆👆👆 新增结束 👆👆👆 */}
+
                             <button 
                               className="btn-small" 
                               style={{color: 'red', borderColor: '#fee2e2', background: '#fef2f2'}}
@@ -297,7 +328,7 @@ const getFilteredPrompts = () => {
     </div>
   )
 
-  // --- 渲染组件：列表视图 (原本的 Grid) ---
+  // --- 渲染组件：列表视图 ---
   const renderListView = () => (
     <div className="content-area">
         <div className="grid">
@@ -322,7 +353,6 @@ const getFilteredPrompts = () => {
                 <div className="card-footer">
                 <div style={{display:'flex', gap:'8px'}}>
                     <button className="btn-icon" onClick={() => { setViewingPrompt(p); setModalMode('view') }} title="查看">{Icon.Eye}</button>
-                    {/* 只有本人或管理员可以编辑/删除 */}
                     {(user.id === p.user_id || isAdmin) && (
                         <>
                             <button 
@@ -351,13 +381,10 @@ const getFilteredPrompts = () => {
     </div>
   )
 
-  // --- 拖拽与输入框逻辑 (保持不变，省略部分细节以节省篇幅，功能与之前一致) ---
-  // ... (handleDragStart, handleDrop, handleInputConfirm, etc.) 
-  // 保持原有逻辑，这里为了代码简洁直接引用你原有的
-  
-    const handleDragStart = (e, item) => { setDragItem(item); e.dataTransfer.effectAllowed = 'move' }
-    const handleDragOver = (e) => { e.preventDefault() }
-    const handleDrop = (e, targetItem) => {
+  // --- 拖拽与输入框逻辑 ---
+  const handleDragStart = (e, item) => { setDragItem(item); e.dataTransfer.effectAllowed = 'move' }
+  const handleDragOver = (e) => { e.preventDefault() }
+  const handleDrop = (e, targetItem) => {
         e.preventDefault()
         if (!dragItem || dragItem.type !== targetItem.type || dragItem.parentId !== targetItem.parentId) return 
         const newCats = JSON.parse(JSON.stringify(categories))
@@ -369,18 +396,49 @@ const getFilteredPrompts = () => {
         }
         saveCategoriesToCloud(newCats); setDragItem(null)
     }
-    const handleInputConfirm = () => {
-        const val = inputState.value.trim()
-        if (!val) return alert('不能为空')
-        const newCats = JSON.parse(JSON.stringify(categories))
-        if (inputState.mode === 'add_root') newCats.push({ id: Date.now().toString(), name: val, icon: '📂', children: [] })
-        else if (inputState.mode === 'add_child') { const p = newCats.find(c => c.id === inputState.parentId); if(p) p.children.push({ id: Date.now().toString(), name: val }) }
-        else if (inputState.mode === 'rename') {
-            const root = newCats.find(c => c.id === inputState.parentId)
-            if (inputState.childId) { const child = root.children.find(c => c.id === inputState.childId); if(child) child.name = val } else if (root) root.name = val
-        }
-        saveCategoriesToCloud(newCats); setModalMode('category')
+
+  // --- 输入确认逻辑 (含防重) ---
+  const handleInputConfirm = () => {
+    const val = inputState.value.trim()
+    if (!val) return alert('名称不能为空')
+
+    const newCats = JSON.parse(JSON.stringify(categories))
+    
+    // 检查重复辅助函数
+    const isDuplicate = (list, name, excludeId = null) => {
+        return list.some(item => item.name === name && item.id !== excludeId);
     }
+
+    if (inputState.mode === 'add_root') {
+        if (isDuplicate(newCats, val)) return alert('该分类名称已存在！');
+        newCats.push({ id: Date.now().toString(), name: val, icon: '📂', children: [] })
+    } 
+    else if (inputState.mode === 'add_child') {
+        const parent = newCats.find(c => c.id === inputState.parentId)
+        if (parent) {
+            if (isDuplicate(parent.children, val)) return alert('该分类下已存在同名子分类！');
+            parent.children.push({ id: Date.now().toString(), name: val })
+        }
+    } 
+    else if (inputState.mode === 'rename') {
+        const root = newCats.find(c => c.id === inputState.parentId)
+        if (inputState.childId) {
+            const child = root.children.find(c => c.id === inputState.childId)
+            if (child) {
+                if (isDuplicate(root.children, val, child.id)) return alert('同级下已存在该名称！');
+                child.name = val
+            }
+        } else {
+            if (root) {
+                if (isDuplicate(newCats, val, root.id)) return alert('已存在同名分类！');
+                root.name = val
+            }
+        }
+    }
+    
+    saveCategoriesToCloud(newCats)
+    setModalMode('category')
+  }
 
   // --- Render Main ---
   if (loading) return <div style={{display:'flex', height:'100vh', alignItems:'center', justifyContent:'center', color:'#6b7280'}}>Loading...</div>
@@ -416,57 +474,36 @@ const getFilteredPrompts = () => {
           
           {categories.map(cat => {
             const hasActiveChild = cat.children?.some(child => child.id === selectedId)
+            // 修改：不再强制展开，解决无法收起的 bug
             const isExpanded = expandedCats[cat.id] || hasActiveChild
+            
             return (
               <div key={cat.id}>
-                  {categories.map(cat => {
-                              const hasActiveChild = cat.children?.some(child => child.id === selectedId)
-                              // 修改：如果当前选中的是一级分类本身，也保持展开状态
-                              const isExpanded = expandedCats[cat.id] || hasActiveChild || selectedId === cat.id 
-                              
-                              return (
-                                <div key={cat.id}>
-                                  {/* 👇 修改开始：点击一级菜单时，同时执行选中 + 切换视图 + 展开/收起 👇 */}
-                                  <div 
-                                    className={`menu-item ${selectedId === cat.id ? 'active' : ''}`} 
-                                    onClick={() => { 
-                                      setSelectedId(cat.id); 
-                                      setViewMode('list'); 
-                                      setExpandedCats(prev => ({...prev, [cat.id]: !prev[cat.id]})) 
-                                    }}
-                                  >
-                                    <div style={{display:'flex', gap:'8px'}}>
-                                      <span>{cat.icon || '📂'}</span> {cat.name}
-                                    </div>
-                                    <span style={{fontSize:'10px', color:'#ccc'}}>{isExpanded ? '▼' : '▶'}</span>
-                                  </div>
-                                  {/* 👆 修改结束 👆 */}
+                {/* 点击一级菜单 */}
+                <div 
+                  className={`menu-item ${selectedId === cat.id ? 'active' : ''}`} 
+                  onClick={() => { 
+                    setSelectedId(cat.id); 
+                    setViewMode('list'); 
+                    setExpandedCats(prev => ({...prev, [cat.id]: !prev[cat.id]})) 
+                  }}
+                >
+                  <div style={{display:'flex', gap:'8px'}}>
+                    <span>{cat.icon || '📂'}</span> {cat.name}
+                  </div>
+                  <span style={{fontSize:'10px', color:'#ccc'}}>{isExpanded ? '▼' : '▶'}</span>
+                </div>
 
-                                  {isExpanded && (
-                                    <div className="submenu">
-                                      {cat.children?.map(child => (
-                                        <div key={child.id} 
-                                            className={`submenu-item ${selectedId === child.id ? 'active' : ''}`}
-                                            onClick={(e) => { 
-                                              e.stopPropagation(); // 防止冒泡
-                                              setSelectedId(child.id); 
-                                              setViewMode('list') 
-                                            }}
-                                        >
-                                          {child.name}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )
-                            })}
                 {isExpanded && (
                   <div className="submenu">
                     {cat.children?.map(child => (
                       <div key={child.id} 
-                           className={`submenu-item ${viewMode === 'list' && selectedId === child.id ? 'active' : ''}`}
-                           onClick={() => { setSelectedId(child.id); setViewMode('list') }}
+                           className={`submenu-item ${selectedId === child.id ? 'active' : ''}`}
+                           onClick={(e) => { 
+                             e.stopPropagation(); 
+                             setSelectedId(child.id); 
+                             setViewMode('list') 
+                           }}
                       >
                         {child.name}
                       </div>
@@ -477,6 +514,7 @@ const getFilteredPrompts = () => {
             )
           })}
         </div>
+        
         {/* 底部用户信息栏 */}
         <div style={{padding:'15px', textAlign:'center', fontSize:'12px', color:'#9ca3af', borderTop:'1px solid #e5e7eb'}}>
            <div style={{marginBottom:'5px', fontWeight:600}}>{isAdmin ? '管理员' : '普通用户'}</div>
@@ -485,16 +523,15 @@ const getFilteredPrompts = () => {
         </div>
       </div>
 
-      {/* 主内容区域：根据 viewMode 切换 */}
+      {/* 主内容区域 */}
       <div className="main">
         <header className="header">
           <div className="header-title">
              {viewMode === 'home' && '仪表盘'}
              {viewMode === 'admin' && '系统管理'}
-             {viewMode === 'list' && (selectedId === 'all' ? '全部提示词' : categories.flatMap(c => c.children).find(c => c.id === selectedId)?.name || '筛选结果')}
+             {viewMode === 'list' && (selectedId === 'all' ? '全部提示词' : categories.flatMap(c => c.children).find(c => c.id === selectedId)?.name || categories.find(c => c.id === selectedId)?.name || '筛选结果')}
           </div>
           
-          {/* 只有在 List 模式才显示搜索框和排序 */}
           {viewMode === 'list' && (
             <div className="toolbar">
                 <div className="search-box">
@@ -515,16 +552,13 @@ const getFilteredPrompts = () => {
           )}
         </header>
 
-        {/* 核心渲染路由 */}
         {viewMode === 'home' && renderHome()}
         {viewMode === 'admin' && renderAdminPanel()}
         {viewMode === 'list' && renderListView()}
 
       </div>
 
-      {/* 弹窗部分 (Prompt, View, Category, Input) 保持不变，直接复用你原有的代码结构 */}
-      {/* ... 省略重复的 Modal 代码以保持简洁，请直接保留你原文件底部的 Modals ... */}
-      {/* 注意：你需要把原文件中 return 下方 Modal 的部分粘贴回来，不需要任何修改 */}
+      {/* 弹窗部分 */}
       {modalMode === 'prompt' && (
         <div className="modal-overlay">
           <div className="modal-large">
