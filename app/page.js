@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 // --- 1. 图标组件库 ---
 const Icon = {
-  Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+  Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink: 0}}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
   Search: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
   Plus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
   Edit: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
@@ -14,17 +14,18 @@ const Icon = {
   Eye: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
   Users: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>,
   Home: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
-  // 收藏图标
   Star: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
   StarFill: <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+  ChevronDown: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>,
 }
 
 // --- 2. 大模型配置 ---
 const AI_MODELS = [
   { name: 'DeepSeek', url: 'https://chat.deepseek.com/', color: '#4d6bfe' },
   { name: 'ChatGPT', url: 'https://chatgpt.com/', color: '#10a37f' },
-  { name: 'Claude', url: 'https://claude.ai/', color: '#d97757' },
   { name: 'Gemini', url: 'https://gemini.google.com/', color: '#4285f4' },
+  { name: 'Claude', url: 'https://claude.ai/', color: '#d97757' },
+  { name: 'Cursor', url: 'https://www.cursor.com/', color: '#000000' },
   { name: '豆包', url: 'https://www.doubao.com/', color: '#0066ff' },
   { name: 'Grok', url: 'https://grok.x.ai/', color: '#000000' },
 ]
@@ -42,13 +43,13 @@ export default function Home() {
   const [user, setUser] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState('home') // 'home' | 'list' | 'admin' | 'favorites'
+  const [viewMode, setViewMode] = useState('home') 
   
   const [prompts, setPrompts] = useState([])
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [catRecordId, setCatRecordId] = useState(null)
   const [usersList, setUsersList] = useState([])
-  const [favorites, setFavorites] = useState([]) // 收藏列表
+  const [favorites, setFavorites] = useState([]) 
   
   const [selectedId, setSelectedId] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,7 +59,7 @@ export default function Home() {
   const [modalMode, setModalMode] = useState(null) 
   const [editingPrompt, setEditingPrompt] = useState(null)
   const [viewingPrompt, setViewingPrompt] = useState(null)
-  const [inputState, setInputState] = useState({ mode: null, parentId: null, childId: null, value: '' })
+  const [inputState, setInputState] = useState({ mode: null, parentId: null, childId: null, value: '', promptTitle: '' })
   
   const [dragItem, setDragItem] = useState(null)
 
@@ -71,24 +72,20 @@ export default function Home() {
       const currentUser = session.user
       setUser(currentUser)
 
-      // 1. 检查管理员权限
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
       if (profile && profile.role === 'admin') setIsAdmin(true)
 
-      // 2. 加载分类
       const { data: catData } = await supabase.from('categories').select('*').limit(1).maybeSingle()
       if (catData) {
         setCategories(catData.content)
         setCatRecordId(catData.id)
       }
 
-      // 3. 加载收藏数据
       const { data: favData } = await supabase.from('favorites').select('prompt_id')
       if (favData) {
         setFavorites(favData.map(f => f.prompt_id))
       }
 
-      // 4. 加载提示词
       await fetchPrompts()
       setLoading(false)
     }
@@ -106,22 +103,17 @@ export default function Home() {
     if (data) setUsersList(data)
   }
 
-  // --- 业务逻辑：浏览量与收藏 ---
+  // --- 业务逻辑 ---
   const handleViewDetails = async (p) => {
     setViewingPrompt(p)
     setModalMode('view')
-    
-    // 异步更新浏览量
     await supabase.rpc('increment_view_count', { row_id: p.id })
-    // 本地乐观更新
     setPrompts(prev => prev.map(item => item.id === p.id ? { ...item, view_count: (item.view_count || 0) + 1 } : item))
   }
 
   const toggleFavorite = async (e, prompt) => {
     e.stopPropagation()
     const isFav = favorites.includes(prompt.id)
-    
-    // 本地更新
     if (isFav) {
       setFavorites(prev => prev.filter(id => id !== prompt.id))
       await supabase.from('favorites').delete().match({ prompt_id: prompt.id, user_id: user.id })
@@ -138,7 +130,6 @@ export default function Home() {
     window.open(url, '_blank')
   }
 
-  // --- 业务逻辑：管理 ---
   const handleDeleteUser = async (userId) => {
     if (!confirm('⚠️ 高危操作：确定要移除该用户吗？\n这将同时删除该用户的所有提示词数据！')) return
     await supabase.from('prompts').delete().eq('user_id', userId)
@@ -167,10 +158,37 @@ export default function Home() {
     }
   }
 
+  // --- 新增：删除分类逻辑 ---
+  const handleDeleteCategory = (type, id, parentId = null) => {
+    if (!confirm('确定要删除该分类吗？\n删除后，该分类下的提示词可能会失去归属分类。')) return
+
+    const newCats = JSON.parse(JSON.stringify(categories))
+
+    if (type === 'root') {
+      const index = newCats.findIndex(c => c.id === id)
+      if (index !== -1) {
+        newCats.splice(index, 1)
+      }
+    } else if (type === 'child') {
+      const parent = newCats.find(c => c.id === parentId)
+      if (parent) {
+        const childIndex = parent.children.findIndex(c => c.id === id)
+        if (childIndex !== -1) {
+          parent.children.splice(childIndex, 1)
+        }
+      }
+    }
+    saveCategoriesToCloud(newCats)
+  }
+
   const handleSavePrompt = async () => {
-    // 校验必填项
     if (!editingPrompt.title || !editingPrompt.content || !editingPrompt.categoryId) {
         return alert('请填写完整：标题、分类和内容均为必填项')
+    }
+
+    const isRoot = categories.some(c => c.id === editingPrompt.categoryId)
+    if (isRoot) {
+        return alert('⚠️ 请选择具体的【二级子分类】。\n\n一级分类仅用于归档，不能直接存放提示词。\n\n提示：您可以选中当前的一级分类，然后点击右侧 "+" 号快速新建子分类。')
     }
 
     let tagsArr = []
@@ -207,17 +225,15 @@ export default function Home() {
     router.push('/login')
   }
 
-  // --- 筛选与排序 ---
   const getFilteredPrompts = () => {
     let list = prompts.filter(p => {
-      // 1. 收藏夹模式筛选
-      if (viewMode === 'favorites') {
-        if (!favorites.includes(p.id)) return false
-      }
+      // 1. 收藏夹模式
+      if (viewMode === 'favorites' && !favorites.includes(p.id)) return false
+      // 2. 我发布的模式
+      if (viewMode === 'my_prompts' && p.user_id !== user?.id) return false
 
-      // 2. 分类匹配
       let matchCat = false
-      if (viewMode === 'favorites' || selectedId === 'all') {
+      if (viewMode === 'favorites' || viewMode === 'my_prompts' || selectedId === 'all') {
         matchCat = true
       } else {
         const rootCat = categories.find(c => c.id === selectedId)
@@ -229,14 +245,11 @@ export default function Home() {
         }
       }
 
-      // 3. 搜索匹配
       const searchLower = searchQuery.toLowerCase()
       const matchSearch = (p.title + p.content + (p.desc || '')).toLowerCase().includes(searchLower)
-      
       return matchCat && matchSearch
     })
 
-    // 4. 排序
     list.sort((a, b) => {
       if (sortType === 'hot') return (b.view_count || 0) - (a.view_count || 0)
       const tA = new Date(a.updated_at).getTime()
@@ -245,7 +258,6 @@ export default function Home() {
       if (sortType === 'name_asc') return a.title.localeCompare(b.title, 'zh')
       return 0
     })
-    
     return list
   }
   
@@ -259,7 +271,17 @@ export default function Home() {
     return list.map(t => t.trim()).filter(t => t.length > 0 && t !== '[]')
   }
 
-  // --- 拖拽处理 ---
+  const getSelectedCategoryName = (id) => {
+    if (!id) return '-- 请选择 --'
+    const root = categories.find(c => c.id === id)
+    if (root) return `${root.icon || '📂'} ${root.name}`
+    for (const cat of categories) {
+        const child = cat.children?.find(sub => sub.id === id)
+        if (child) return child.name
+    }
+    return '-- 请选择 --'
+  }
+
   const handleDragStart = (e, item) => { setDragItem(item); e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e) => { e.preventDefault() }
   const handleDrop = (e, targetItem) => {
@@ -275,12 +297,53 @@ export default function Home() {
     saveCategoriesToCloud(newCats); setDragItem(null)
   }
 
-  // --- 输入确认 ---
+  const handleQuickAddClick = () => {
+    const currentId = editingPrompt.categoryId
+    if (!currentId) {
+        setInputState({ mode: 'quick_add_root', value: '', promptTitle: '新建一级分类' })
+        setModalMode('input')
+        return
+    }
+    const rootCat = categories.find(c => c.id === currentId)
+    if (rootCat) {
+        setInputState({ mode: 'quick_add_child', parentId: rootCat.id, value: '', promptTitle: `在【${rootCat.name}】下新建子分类` })
+        setModalMode('input')
+        return
+    }
+    const isLevel2 = categories.some(c => c.children?.some(sub => sub.id === currentId));
+    if (isLevel2) {
+        return alert('⚠️ 无法新建：当前已选中二级分类。\n\n系统仅支持两级目录结构。如需新建子分类，请先在下拉框中选中对应的一级父分类。');
+    }
+  }
+
   const handleInputConfirm = () => {
     const val = inputState.value.trim()
     if (!val) return alert('名称不能为空')
     const newCats = JSON.parse(JSON.stringify(categories))
     const isDuplicate = (list, name, excludeId = null) => list.some(item => item.name === name && item.id !== excludeId)
+
+    if (inputState.mode === 'quick_add_root') {
+        if (isDuplicate(newCats, val)) return alert('名称已存在！')
+        const newId = Date.now().toString()
+        newCats.push({ id: newId, name: val, icon: '📂', children: [] })
+        saveCategoriesToCloud(newCats)
+        setEditingPrompt(prev => ({ ...prev, categoryId: newId }))
+        setModalMode('prompt') 
+        return
+    }
+
+    if (inputState.mode === 'quick_add_child') {
+         const parent = newCats.find(c => c.id === inputState.parentId)
+         if (parent) {
+            if (isDuplicate(parent.children, val)) return alert('同名子分类已存在！')
+            const newId = Date.now().toString()
+            parent.children.push({ id: newId, name: val })
+            saveCategoriesToCloud(newCats)
+            setEditingPrompt(prev => ({ ...prev, categoryId: newId }))
+            setModalMode('prompt')
+            return
+         }
+    }
 
     if (inputState.mode === 'add_root') {
       if (isDuplicate(newCats, val)) return alert('名称已存在！')
@@ -309,6 +372,118 @@ export default function Home() {
     saveCategoriesToCloud(newCats)
     setModalMode('category')
   }
+
+  // --- 核心渲染函数 ---
+
+  const renderHome = () => (
+    <div className="content-area">
+      <h2 style={{fontSize:'20px', fontWeight:'bold', marginBottom:'20px', paddingLeft:'20px'}}>📚 提示词概览</h2>
+      <div className="dashboard-grid">
+        <div className="stack-card" onClick={() => { setSelectedId('all'); setViewMode('list') }}>
+            <div className="stack-icon">🏠</div>
+            <div className="stack-title">全部提示词</div>
+            <div className="stack-count">{prompts.length} 个</div>
+        </div>
+        {categories.map(cat => {
+            let count = getCategoryCount(cat.id)
+            cat.children.forEach(sub => { count += getCategoryCount(sub.id) })
+            return (
+                <div key={cat.id} className="stack-card" onClick={() => { setSelectedId(cat.children?.[0]?.id || cat.id); setExpandedCats(prev => ({...prev, [cat.id]: true})); setViewMode('list') }}>
+                    <div className="stack-icon">{cat.icon || '📂'}</div>
+                    <div className="stack-title">{cat.name}</div>
+                    <div className="stack-count">{count} 个</div>
+                </div>
+            )
+        })}
+      </div>
+    </div>
+  )
+
+  const renderAdminPanel = () => (
+    <div className="content-area">
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
+        <h2 style={{fontSize:'20px', fontWeight:'bold'}}>🛡️ 用户管理</h2>
+        <button className="btn-small" onClick={fetchUsers}>刷新列表</button>
+      </div>
+      <div className="admin-table-container">
+        <table className="admin-table">
+            <thead><tr><th>用户邮箱</th><th>注册时间</th><th>角色</th><th>操作</th></tr></thead>
+            <tbody>
+                {usersList.map(u => (
+                    <tr key={u.id}>
+                        <td>{u.email}</td>
+                        <td>{new Date(u.created_at).toLocaleString()}</td>
+                        <td><span className={u.role === 'admin' ? 'badge-admin' : 'badge-user'}>{u.role === 'admin' ? '管理员' : '普通用户'}</span></td>
+                        <td style={{display:'flex', gap:'10px'}}>
+                            <button className="btn-small" style={{color: u.role === 'admin' ? '#d97706' : '#2563eb', borderColor: u.role === 'admin' ? '#fcd34d' : '#bfdbfe', background: u.role === 'admin' ? '#fffbeb' : '#eff6ff'}} onClick={() => handleToggleAdmin(u.id, u.role)}>{u.role === 'admin' ? '降级' : '提权'}</button>
+                            <button className="btn-small" style={{color: 'red', borderColor: '#fee2e2', background: '#fef2f2'}} onClick={() => handleDeleteUser(u.id)}>删除</button>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  )
+
+  const renderListView = () => (
+    <div className="content-area">
+        <div className="grid">
+        {getFilteredPrompts().map(p => {
+            const validTags = getValidTags(p.tags)
+            return (
+            <div key={p.id} className="card" style={{position: 'relative'}}>
+                <div className="card-header">
+                    <div className="card-title" onClick={() => handleViewDetails(p)} title={p.title} style={{paddingRight: '30px'}}>{p.title}</div>
+                </div>
+                <div 
+                        onClick={(e) => toggleFavorite(e, p)} 
+                        style={{position: 'absolute', top: '12px', right: '12px', cursor: 'pointer', padding: '4px', color: favorites.includes(p.id) ? '#f59e0b' : '#9ca3af', zIndex: 10}}
+                        title={favorites.includes(p.id) ? "取消收藏" : "收藏"}
+                    >
+                        {favorites.includes(p.id) ? Icon.StarFill : Icon.Star}
+                    </div>
+
+                {validTags.length > 0 && <div className="tags" style={{marginTop:'5px'}}>{validTags.map((t, i) => <span key={i} className="tag">{t}</span>)}</div>}
+                <div className="card-body" onClick={() => handleViewDetails(p)} title="点击查看详情">{p.content}</div>
+                <div className="card-footer">
+                    <div style={{display:'flex', gap:'12px', alignItems:'center', color:'#9ca3af', fontSize:'12px'}}>
+                        <div style={{display:'flex', alignItems:'center', gap:'4px'}} title="浏览次数">{Icon.Eye} {p.view_count || 0}</div>
+                        {(user.id === p.user_id || isAdmin) && (
+                            <>
+                                <button className="btn-icon" onClick={() => { setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', ') }); setModalMode('prompt') }}>{Icon.Edit}</button>
+                                <button className="btn-icon delete" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button>
+                            </>
+                        )}
+                    </div>
+                    <button className="btn-copy" onClick={() => {navigator.clipboard.writeText(p.content); alert('已复制')}}>{Icon.Copy} 复制</button>
+                </div>
+            </div>
+            )
+        })}
+
+        {viewMode === 'list' && (
+            <div 
+                className="card" 
+                onClick={() => {
+                    setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '' });
+                    setModalMode('prompt');
+                }}
+                style={{
+                    minHeight: '180px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    border: '2px dashed #e5e7eb', borderRadius: '12px', cursor: 'pointer', color: '#9ca3af', backgroundColor: '#f9fafb', transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.color = '#3b82f6'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+            >
+                <div style={{fontSize: '40px', lineHeight: '40px', fontWeight: '300'}}>+</div>
+                <div style={{fontSize: '14px', marginTop: '10px', fontWeight: '500'}}>新建提示词</div>
+            </div>
+        )}
+        </div>
+        {getFilteredPrompts().length === 0 && viewMode !== 'list' && <div style={{textAlign:'center', color:'#9ca3af', marginTop:'100px'}}>暂无内容</div>}
+    </div>
+  )
 
   // --- 渲染组件 ---
   if (loading) return <div style={{display:'flex', height:'100vh', alignItems:'center', justifyContent:'center', color:'#6b7280'}}>Loading...</div>
@@ -339,7 +514,12 @@ export default function Home() {
             <div style={{display:'flex', gap:'10px'}}><span>🏠</span> 全部提示词</div>
           </div>
           
-          {/* 我的收藏入口 */}
+          <div className={`menu-item ${viewMode === 'my_prompts' ? 'active' : ''}`} onClick={() => { setViewMode('my_prompts'); setSelectedId('all'); }}>
+            <div style={{display:'flex', gap:'10px', color: viewMode === 'my_prompts' ? '#2563eb' : 'inherit'}}>
+               <span>📝</span> 我的发布
+            </div>
+          </div>
+
           <div className={`menu-item ${viewMode === 'favorites' ? 'active' : ''}`} onClick={() => { setViewMode('favorites'); setSelectedId('all'); }}>
             <div style={{display:'flex', gap:'10px', color: viewMode === 'favorites' ? '#b45309' : 'inherit'}}>
                <span style={{color: '#f59e0b'}}>⭐</span> 我的收藏
@@ -389,22 +569,13 @@ export default function Home() {
              {viewMode === 'home' && '首页'}
              {viewMode === 'admin' && '系统管理'}
              {viewMode === 'favorites' && '⭐ 我的收藏'}
+             {viewMode === 'my_prompts' && '📝 我的发布'}
              {viewMode === 'list' && (selectedId === 'all' ? '全部提示词' : categories.flatMap(c => c.children).find(c => c.id === selectedId)?.name || categories.find(c => c.id === selectedId)?.name || '筛选结果')}
           </div>
           
-          {(viewMode === 'list' || viewMode === 'favorites' || viewMode === 'home') && (
+          {(viewMode === 'list' || viewMode === 'favorites' || viewMode === 'home' || viewMode === 'my_prompts') && (
             <div className="toolbar">
-                <div className="search-box" style={{
-                    display:'flex', 
-                    alignItems:'center', 
-                    border:'1px solid #e5e7eb', 
-                    borderRadius:'8px', 
-                    padding:'6px 12px', 
-                    background:'white', 
-                    width: '300px',
-                    gap:'8px'
-                }}>
-                    {/* 输入框放前面 */}
+                <div className="search-box" style={{display:'flex', alignItems:'center', border:'1px solid #e5e7eb', borderRadius:'8px', padding:'6px 12px', background:'white', width: '300px', gap:'8px'}}>
                     <input 
                         type="text" 
                         className="search-input" 
@@ -412,7 +583,6 @@ export default function Home() {
                         value={searchQuery} 
                         onChange={e => {
                             setSearchQuery(e.target.value);
-                            // 首页搜索自动跳转
                             if (viewMode === 'home' && e.target.value.trim() !== '') {
                                 setViewMode('list');
                                 setSelectedId('all');
@@ -420,7 +590,6 @@ export default function Home() {
                         }} 
                         style={{border:'none', outline:'none', flex:1, fontSize:'14px', color:'#374151'}} 
                     />
-                    {/* 图标放后面 */}
                     <div style={{color:'#9ca3af', display:'flex'}}>{Icon.Search}</div>
                 </div>
 
@@ -442,106 +611,9 @@ export default function Home() {
           )}
         </header>
 
-        {viewMode === 'home' && (
-           <div className="content-area">
-             <h2 style={{fontSize:'20px', fontWeight:'bold', marginBottom:'20px', paddingLeft:'20px'}}>📚 提示词概览</h2>
-             <div className="dashboard-grid">
-               <div className="stack-card" onClick={() => { setSelectedId('all'); setViewMode('list') }}>
-                   <div className="stack-icon">🏠</div>
-                   <div className="stack-title">全部提示词</div>
-                   <div className="stack-count">{prompts.length} 个</div>
-               </div>
-               {categories.map(cat => {
-                   let count = getCategoryCount(cat.id)
-                   cat.children.forEach(sub => { count += getCategoryCount(sub.id) })
-                   return (
-                       <div key={cat.id} className="stack-card" onClick={() => { setSelectedId(cat.children?.[0]?.id || cat.id); setExpandedCats(prev => ({...prev, [cat.id]: true})); setViewMode('list') }}>
-                           <div className="stack-icon">{cat.icon || '📂'}</div>
-                           <div className="stack-title">{cat.name}</div>
-                           <div className="stack-count">{count} 个</div>
-                       </div>
-                   )
-               })}
-             </div>
-           </div>
-        )}
-
-        {viewMode === 'admin' && (
-           <div className="content-area">
-             <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
-               <h2 style={{fontSize:'20px', fontWeight:'bold'}}>🛡️ 用户管理</h2>
-               <button className="btn-small" onClick={fetchUsers}>刷新列表</button>
-             </div>
-             <div className="admin-table-container">
-               <table className="admin-table">
-                   <thead><tr><th>用户邮箱</th><th>注册时间</th><th>角色</th><th>操作</th></tr></thead>
-                   <tbody>
-                       {usersList.map(u => (
-                           <tr key={u.id}>
-                               <td>{u.email}</td>
-                               <td>{new Date(u.created_at).toLocaleString()}</td>
-                               <td><span className={u.role === 'admin' ? 'badge-admin' : 'badge-user'}>{u.role === 'admin' ? '管理员' : '普通用户'}</span></td>
-                               <td style={{display:'flex', gap:'10px'}}>
-                                   <button className="btn-small" style={{color: u.role === 'admin' ? '#d97706' : '#2563eb', borderColor: u.role === 'admin' ? '#fcd34d' : '#bfdbfe', background: u.role === 'admin' ? '#fffbeb' : '#eff6ff'}} onClick={() => handleToggleAdmin(u.id, u.role)}>{u.role === 'admin' ? '降级' : '提权'}</button>
-                                   <button className="btn-small" style={{color: 'red', borderColor: '#fee2e2', background: '#fef2f2'}} onClick={() => handleDeleteUser(u.id)}>删除</button>
-                               </td>
-                           </tr>
-                       ))}
-                   </tbody>
-               </table>
-             </div>
-           </div>
-        )}
-
-        {(viewMode === 'list' || viewMode === 'favorites') && (
-            <div className="content-area">
-                <div className="grid">
-                {getFilteredPrompts().map(p => {
-                    const validTags = getValidTags(p.tags)
-                    return (
-                    <div key={p.id} className="card" style={{position: 'relative'}}>
-                        <div className="card-header">
-                            <div className="card-title" onClick={() => handleViewDetails(p)} title={p.title} style={{paddingRight: '30px'}}>{p.title}</div>
-                        </div>
-                        
-                        {/* 绝对定位的星星图标 */}
-                        <div 
-                             onClick={(e) => toggleFavorite(e, p)} 
-                             style={{
-                                 position: 'absolute',
-                                 top: '12px',
-                                 right: '12px',
-                                 cursor: 'pointer',
-                                 padding: '4px',
-                                 color: favorites.includes(p.id) ? '#f59e0b' : '#9ca3af',
-                                 zIndex: 10
-                             }}
-                             title={favorites.includes(p.id) ? "取消收藏" : "收藏"}
-                         >
-                             {favorites.includes(p.id) ? Icon.StarFill : Icon.Star}
-                         </div>
-
-                        {validTags.length > 0 && <div className="tags" style={{marginTop:'5px'}}>{validTags.map((t, i) => <span key={i} className="tag">{t}</span>)}</div>}
-                        <div className="card-body" onClick={() => handleViewDetails(p)} title="点击查看详情">{p.content}</div>
-                        <div className="card-footer">
-                            <div style={{display:'flex', gap:'12px', alignItems:'center', color:'#9ca3af', fontSize:'12px'}}>
-                                <div style={{display:'flex', alignItems:'center', gap:'4px'}} title="浏览次数">{Icon.Eye} {p.view_count || 0}</div>
-                                {(user.id === p.user_id || isAdmin) && (
-                                    <>
-                                        <button className="btn-icon" onClick={() => { setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', ') }); setModalMode('prompt') }}>{Icon.Edit}</button>
-                                        <button className="btn-icon delete" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button>
-                                    </>
-                                )}
-                            </div>
-                            <button className="btn-copy" onClick={() => {navigator.clipboard.writeText(p.content); alert('已复制')}}>{Icon.Copy} 复制</button>
-                        </div>
-                    </div>
-                    )
-                })}
-                </div>
-                {getFilteredPrompts().length === 0 && <div style={{textAlign:'center', color:'#9ca3af', marginTop:'100px'}}>暂无内容</div>}
-            </div>
-        )}
+        {viewMode === 'home' && renderHome()}
+        {viewMode === 'admin' && renderAdminPanel()}
+        {(viewMode === 'list' || viewMode === 'favorites' || viewMode === 'my_prompts') && renderListView()}
 
       </div>
 
@@ -555,10 +627,22 @@ export default function Home() {
                 <div style={{flex:2}}><label className="form-label">标题</label><input className="form-input" value={editingPrompt.title} onChange={e => setEditingPrompt({...editingPrompt, title: e.target.value})} placeholder="输入标题..." /></div>
                 <div style={{flex:1}}>
                     <label className="form-label">分类 <span style={{color:'red'}}>*</span></label>
-                    <select className="form-select" value={editingPrompt.categoryId} onChange={e => setEditingPrompt({...editingPrompt, categoryId: e.target.value})}>
-                        <option value="">-- 请选择 --</option>
-                        {categories.map(c => (<optgroup key={c.id} label={c.name}>{c.children.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}</optgroup>))}
-                    </select>
+                    <div style={{display:'flex', gap:'8px', alignItems:'stretch'}}>
+                        <div style={{position: 'relative', flex: 1}}>
+                            <div className="form-select" style={{pointerEvents: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff'}}>
+                                <span>{getSelectedCategoryName(editingPrompt.categoryId)}</span>
+                                <span style={{color:'#6b7280'}}>{Icon.ChevronDown}</span>
+                            </div>
+                            <select value={editingPrompt.categoryId} onChange={e => setEditingPrompt({...editingPrompt, categoryId: e.target.value})} style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'}}>
+                                <option value="">-- 请选择 --</option>
+                                {categories.map(c => [
+                                    <option key={c.id} value={c.id} style={{fontWeight:'bold', color:'#111827'}}>{c.icon || '📂'} {c.name}</option>,
+                                    ...c.children.map(sub => (<option key={sub.id} value={sub.id} style={{color:'#4b5563'}}>&nbsp;&nbsp;&nbsp;&nbsp;└ {sub.name}</option>))
+                                ])}
+                            </select>
+                        </div>
+                        <button className="btn-icon" style={{border:'1px solid #d1d5db', borderRadius:'6px', width:'38px', height:'38px', display:'flex', alignItems:'center', justifyContent:'center', background:'#f9fafb'}} onClick={handleQuickAddClick} title="快速新建分类">{Icon.Plus}</button>
+                    </div>
                 </div>
                 </div>
                 <div className="form-group"><label className="form-label">描述</label><input className="form-input" value={editingPrompt.desc} onChange={e => setEditingPrompt({...editingPrompt, desc: e.target.value})} /></div>
@@ -570,7 +654,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* 弹窗：查看详情 + 大模型跳转 */}
+      {/* 弹窗：查看详情 */}
       {modalMode === 'view' && viewingPrompt && (
         <div className="modal-overlay">
           <div className="modal-large">
@@ -582,8 +666,6 @@ export default function Home() {
                 </div>
                 {viewingPrompt.desc && <div style={{fontSize:'13px', color:'#1e40af', background:'#eff6ff', padding:'12px', borderRadius:'8px', marginBottom:'20px'}}>ℹ️ {viewingPrompt.desc}</div>}
                 <div className="view-content-box">{viewingPrompt.content}</div>
-
-                {/* 大模型一键使用 */}
                 <div style={{marginTop:'30px', borderTop:'1px solid #eee', paddingTop:'20px'}}>
                     <div style={{textAlign:'center', marginBottom:'15px', fontSize:'14px', color:'#6b7280', fontWeight:500}}>🚀 一键复制并跳转使用</div>
                     <div style={{display:'flex', gap:'15px', justifyContent:'center', flexWrap:'wrap'}}>
@@ -611,15 +693,22 @@ export default function Home() {
             <div className="modal-header"><span className="modal-title">分类管理</span><span className="modal-close" onClick={() => setModalMode(null)}>×</span></div>
             <div className="modal-body" style={{display:'flex', flexDirection:'column'}}>
                 <div style={{marginBottom:'20px', display:'flex', gap:'10px'}}>
-                <button className="btn-primary" style={{padding:'0 16px', fontSize:'12px', height:'32px'}} onClick={() => { setInputState({ mode: 'add_root', value: '' }); setModalMode('input') }}>+ 新增一级分类</button>
+                <button className="btn-primary" style={{padding:'0 16px', fontSize:'12px', height:'32px'}} onClick={() => { setInputState({ mode: 'add_root', value: '', promptTitle: '新建一级分类' }); setModalMode('input') }}>+ 新增一级分类</button>
                 <div style={{flex:1, textAlign:'right', fontSize:'12px', color:'#9ca3af'}}>按住 ☰ 拖拽排序</div>
                 </div>
                 <div className="cat-list">
                 {categories.map((cat, catIndex) => (
                     <div key={cat.id} className="cat-item" draggable onDragStart={(e) => handleDragStart(e, { type: 'root', index: catIndex })} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { type: 'root', index: catIndex })}>
                         <div className="cat-header"><span className="cat-drag-handle">☰</span><span className="cat-name">{cat.icon || '📂'} {cat.name}</span>
-                        <div className="cat-actions"><button className="btn-icon" onClick={() => { setInputState({ mode: 'add_child', parentId: cat.id, value: '' }); setModalMode('input') }}>＋</button><button className="btn-icon" onClick={() => { setInputState({ mode: 'rename', parentId: cat.id, value: cat.name }); setModalMode('input') }}>✎</button></div></div>
-                        <div className="sub-list">{cat.children.map((sub, subIndex) => (<div key={sub.id} className="sub-item" draggable onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, { type: 'child', index: subIndex, parentId: cat.id }) }} onDragOver={handleDragOver} onDrop={(e) => { e.stopPropagation(); handleDrop(e, { type: 'child', index: subIndex, parentId: cat.id }) }}><span className="cat-drag-handle">☰</span><span className="cat-name">{sub.name}</span><div className="cat-actions"><button className="btn-icon" onClick={() => { setInputState({ mode: 'rename', parentId: cat.id, childId: sub.id, value: sub.name }); setModalMode('input') }}>✎</button></div></div>))}</div>
+                        <div className="cat-actions">
+                            <button className="btn-icon" onClick={() => { setInputState({ mode: 'add_child', parentId: cat.id, value: '', promptTitle: '新建子分类' }); setModalMode('input') }}>＋</button>
+                            <button className="btn-icon" onClick={() => { setInputState({ mode: 'rename', parentId: cat.id, value: cat.name, promptTitle: '重命名分类' }); setModalMode('input') }}>✎</button>
+                            <button className="btn-icon delete" onClick={() => handleDeleteCategory('root', cat.id)} title="删除分类">{Icon.Delete}</button>
+                        </div></div>
+                        <div className="sub-list">{cat.children.map((sub, subIndex) => (<div key={sub.id} className="sub-item" draggable onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, { type: 'child', index: subIndex, parentId: cat.id }) }} onDragOver={handleDragOver} onDrop={(e) => { e.stopPropagation(); handleDrop(e, { type: 'child', index: subIndex, parentId: cat.id }) }}><span className="cat-drag-handle">☰</span><span className="cat-name">{sub.name}</span><div className="cat-actions">
+                            <button className="btn-icon" onClick={() => { setInputState({ mode: 'rename', parentId: cat.id, childId: sub.id, value: sub.name, promptTitle: '重命名分类' }); setModalMode('input') }}>✎</button>
+                            <button className="btn-icon delete" onClick={() => handleDeleteCategory('child', sub.id, cat.id)} title="删除子分类">{Icon.Delete}</button>
+                        </div></div>))}</div>
                     </div>
                 ))}
                 </div>
@@ -633,9 +722,16 @@ export default function Home() {
       {modalMode === 'input' && (
         <div className="modal-overlay">
           <div className="modal-normal">
-            <div className="modal-header"><span className="modal-title">请输入名称</span><span className="modal-close" onClick={() => setModalMode('category')}>×</span></div>
+            <div className="modal-header">
+                {/* 动态显示标题 */}
+                <span className="modal-title">{inputState.promptTitle || '请输入名称'}</span>
+                <span className="modal-close" onClick={() => setModalMode((inputState.mode.startsWith('quick_') ? 'prompt' : 'category'))}>×</span>
+            </div>
             <div className="modal-body" style={{overflow:'visible'}}><div className="form-group"><input className="form-input" autoFocus value={inputState.value} onChange={e => setInputState({...inputState, value: e.target.value})} onKeyDown={e => e.key === 'Enter' && handleInputConfirm()} /></div></div>
-            <div className="modal-footer"><button className="btn-cancel" onClick={() => setModalMode('category')}>取消</button><button className="btn-primary" onClick={handleInputConfirm}>确定</button></div>
+            <div className="modal-footer">
+                <button className="btn-cancel" onClick={() => setModalMode((inputState.mode.startsWith('quick_') ? 'prompt' : 'category'))}>取消</button>
+                <button className="btn-primary" onClick={handleInputConfirm}>确定</button>
+            </div>
           </div>
         </div>
       )}
