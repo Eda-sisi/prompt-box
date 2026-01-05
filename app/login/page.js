@@ -6,13 +6,18 @@ import { useRouter } from 'next/navigation'
 // --- 图标组件 ---
 const Icon = {
   Mail: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+  User: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
   Lock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>,
   Loader: <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  // inputValue 用于接收用户输入（可能是邮箱，也可能是昵称）
+  const [inputValue, setInputValue] = useState('')
   const [password, setPassword] = useState('')
+  // 注册专用字段
+  const [nickname, setNickname] = useState('') 
+  
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false) // 默认为登录
   const [errorMsg, setErrorMsg] = useState('')
@@ -27,6 +32,7 @@ export default function LoginPage() {
     if (msg.includes('User already registered')) return '该邮箱已被注册，请直接登录'
     if (msg.includes('Password should be')) return '密码长度太短 (至少6位)'
     if (msg.includes('rate limit')) return '操作太频繁，请稍后再试'
+    if (msg.includes('duplicate key value')) return '该昵称已被使用，请换一个'
     return msg
   }
 
@@ -36,22 +42,82 @@ export default function LoginPage() {
     setErrorMsg('')
     
     let error
+    
+    // --- 注册逻辑 ---
     if (isSignUp) {
-      // 注册逻辑
-      const res = await supabase.auth.signUp({ email, password })
+      // 1. 注册时必须是邮箱
+      if (!inputValue.includes('@')) {
+        setErrorMsg('注册请填写有效的电子邮箱')
+        setLoading(false)
+        return
+      }
+      if (!nickname.trim()) {
+        setErrorMsg('请填写用户昵称')
+        setLoading(false)
+        return
+      }
+
+      // 2. 调用 Supabase 注册
+      const res = await supabase.auth.signUp({ 
+        email: inputValue, 
+        password,
+        options: {
+          // 将昵称存入 user_metadata (可选，方便前端直接取)
+          data: { nickname: nickname.trim() }
+        }
+      })
       error = res.error
-      if (!error) {
+
+      // 3. 注册成功后，立即更新 profiles 表的 nickname
+      if (!error && res.data?.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ nickname: nickname.trim() })
+          .eq('id', res.data.user.id)
+        
+        if (profileError) {
+          console.error('更新昵称失败:', profileError)
+          // 这里不阻断流程，虽然没存进 profiles 表，但账号其实注册成功了
+        }
+
         alert('注册成功！正在自动登录...')
         setIsSignUp(false) // 注册完切回登录界面
+        // 清空密码，但保留账号方便用户登录
+        setPassword('')
       }
-    } else {
-      // 登录逻辑
-      const res = await supabase.auth.signInWithPassword({ email, password })
+    } 
+    
+    // --- 登录逻辑 ---
+    else {
+      let loginEmail = inputValue.trim()
+
+      // 1. 如果输入不含 @，视为昵称，先去查邮箱
+      if (!loginEmail.includes('@')) {
+        const { data, error: fetchError } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('nickname', loginEmail) // 假设 profiles 表已有 nickname 字段且唯一
+          .single()
+        
+        if (fetchError || !data) {
+          setErrorMsg('未找到该昵称对应的用户，请检查或使用邮箱登录')
+          setLoading(false)
+          return
+        }
+        loginEmail = data.email // 找到了！切换为真实邮箱
+      }
+
+      // 2. 使用真实邮箱登录
+      const res = await supabase.auth.signInWithPassword({ 
+        email: loginEmail, 
+        password 
+      })
       error = res.error
+      
       if (!error) {
         router.push('/') 
         router.refresh()
-        return // 成功后直接跳转，不执行后面的setLoading(false)以免闪烁
+        return // 成功后直接跳转
       }
     }
 
@@ -134,13 +200,33 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* 注册专属：昵称输入框 */}
+          {isSignUp && (
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>用户昵称 <span style={{color:'red'}}>*</span></label>
+              <div style={{position: 'relative'}}>
+                <span style={{position: 'absolute', left: '12px', top: '10px', color: '#9ca3af'}}>{Icon.User}</span>
+                <input 
+                  type="text" required placeholder="例如：zhangs"
+                  value={nickname} onChange={e => setNickname(e.target.value)}
+                  className="form-input" 
+                  style={{width: '100%', paddingLeft: '38px', height: '40px', fontSize: '14px'}} 
+                />
+              </div>
+              <div style={{fontSize:'12px', color:'#9ca3af', marginTop:'4px'}}>推荐格式：姓全拼+名首字母</div>
+            </div>
+          )}
+
           <div style={{marginBottom: '20px'}}>
-            <label style={{display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>电子邮箱</label>
+            <label style={{display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>
+                {isSignUp ? '电子邮箱' : '账号'} <span style={{color:'red'}}>*</span>
+            </label>
             <div style={{position: 'relative'}}>
               <span style={{position: 'absolute', left: '12px', top: '10px', color: '#9ca3af'}}>{Icon.Mail}</span>
               <input 
-                type="email" required placeholder="name@example.com"
-                value={email} onChange={e => setEmail(e.target.value)}
+                type="text" required 
+                placeholder={isSignUp ? "name@example.com" : "输入邮箱 或 昵称"}
+                value={inputValue} onChange={e => setInputValue(e.target.value)}
                 className="form-input" 
                 style={{width: '100%', paddingLeft: '38px', height: '40px', fontSize: '14px'}} 
               />
@@ -148,7 +234,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{marginBottom: '30px'}}>
-            <label style={{display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>密码</label>
+            <label style={{display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>密码 <span style={{color:'red'}}>*</span></label>
             <div style={{position: 'relative'}}>
               <span style={{position: 'absolute', left: '12px', top: '10px', color: '#9ca3af'}}>{Icon.Lock}</span>
               <input 

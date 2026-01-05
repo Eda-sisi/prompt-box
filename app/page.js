@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 // --- 1. 图标组件库 ---
 const Icon = {
@@ -17,6 +18,9 @@ const Icon = {
   Star: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
   StarFill: <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
   ChevronDown: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>,
+  Beaker: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4.5 3h15"></path><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"></path><path d="M6 14h12"></path></svg>,
+  Upload: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
+  Image: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
 }
 
 // --- 2. 大模型配置 ---
@@ -38,6 +42,7 @@ const DEFAULT_CATEGORIES = [
 export default function Home() {
   const supabase = createClient()
   const router = useRouter()
+  const fileInputRef = useRef(null)
   
   // --- 状态管理 ---
   const [user, setUser] = useState(null)
@@ -60,6 +65,10 @@ export default function Home() {
   const [editingPrompt, setEditingPrompt] = useState(null)
   const [viewingPrompt, setViewingPrompt] = useState(null)
   const [inputState, setInputState] = useState({ mode: null, parentId: null, childId: null, value: '', promptTitle: '' })
+  
+  // 上传相关状态
+  const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
   
   const [dragItem, setDragItem] = useState(null)
 
@@ -93,7 +102,7 @@ export default function Home() {
   }, [router])
 
   const fetchPrompts = async () => {
-    const { data } = await supabase.from('prompts').select('*').order('updated_at', { ascending: false })
+    const { data } = await supabase.from('prompts').select('*, profiles(nickname)').order('updated_at', { ascending: false })
     if (data) setPrompts(data)
   }
 
@@ -117,35 +126,47 @@ export default function Home() {
     if (isFav) {
       setFavorites(prev => prev.filter(id => id !== prompt.id))
       await supabase.from('favorites').delete().match({ prompt_id: prompt.id, user_id: user.id })
+      toast.success('已取消收藏')
     } else {
       setFavorites(prev => [...prev, prompt.id])
       await supabase.from('favorites').insert({ prompt_id: prompt.id, user_id: user.id })
+      toast.success('已加入收藏')
     }
   }
 
   const handleModelJump = (url) => {
     if (!viewingPrompt) return
     navigator.clipboard.writeText(viewingPrompt.content)
-    alert('提示词已复制！正在前往...')
-    window.open(url, '_blank')
+    toast.info('提示词已复制！正在前往...')
+    setTimeout(() => window.open(url, '_blank'), 800)
   }
 
   const handleDeleteUser = async (userId) => {
-    if (!confirm('⚠️ 高危操作：确定要移除该用户吗？\n这将同时删除该用户的所有提示词数据！')) return
-    await supabase.from('prompts').delete().eq('user_id', userId)
-    const { error } = await supabase.from('profiles').delete().eq('id', userId)
-    if (error) alert('删除失败: ' + error.message)
-    else { alert('用户已移除'); fetchUsers() }
+    if (!confirm('⚠️ 高危操作：确定要彻底销毁该账号吗？\n这将删除该用户的所有数据且无法恢复！')) return
+    try {
+      const response = await fetch('/api/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || '删除失败')
+      toast.success('用户及其所有数据已彻底销毁')
+      fetchUsers()
+      fetchPrompts() 
+    } catch (error) {
+      toast.error('操作失败: ' + error.message)
+    }
   }
 
   const handleToggleAdmin = async (userId, currentRole) => {
-    if (userId === user.id) return alert("操作禁止：你不能取消自己的管理员权限！")
+    if (userId === user.id) return toast.warning("操作禁止：你不能取消自己的管理员权限！")
     const newRole = currentRole === 'admin' ? 'user' : 'admin'
     const actionName = newRole === 'admin' ? '设为管理员' : '降级为普通用户'
     if (!confirm(`确定要将该用户 ${actionName} 吗？`)) return
     const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId)
-    if (error) alert("操作失败: " + error.message)
-    else { alert("操作成功！"); fetchUsers() }
+    if (error) toast.error("操作失败: " + error.message)
+    else { toast.success("操作成功！"); fetchUsers() }
   }
 
   const saveCategoriesToCloud = async (newCats) => {
@@ -158,37 +179,67 @@ export default function Home() {
     }
   }
 
-  // --- 新增：删除分类逻辑 ---
   const handleDeleteCategory = (type, id, parentId = null) => {
     if (!confirm('确定要删除该分类吗？\n删除后，该分类下的提示词可能会失去归属分类。')) return
-
     const newCats = JSON.parse(JSON.stringify(categories))
-
     if (type === 'root') {
       const index = newCats.findIndex(c => c.id === id)
-      if (index !== -1) {
-        newCats.splice(index, 1)
-      }
+      if (index !== -1) { newCats.splice(index, 1) }
     } else if (type === 'child') {
       const parent = newCats.find(c => c.id === parentId)
       if (parent) {
         const childIndex = parent.children.findIndex(c => c.id === id)
-        if (childIndex !== -1) {
-          parent.children.splice(childIndex, 1)
-        }
+        if (childIndex !== -1) { parent.children.splice(childIndex, 1) }
       }
     }
     saveCategoriesToCloud(newCats)
+    toast.success('分类已删除')
+  }
+
+  // --- 处理文件上传 ---
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0])
+    }
   }
 
   const handleSavePrompt = async () => {
     if (!editingPrompt.title || !editingPrompt.content || !editingPrompt.categoryId) {
-        return alert('请填写完整：标题、分类和内容均为必填项')
+        return toast.error('请填写完整：标题、分类和内容均为必填项')
     }
 
     const isRoot = categories.some(c => c.id === editingPrompt.categoryId)
     if (isRoot) {
-        return alert('⚠️ 请选择具体的【二级子分类】。\n\n一级分类仅用于归档，不能直接存放提示词。\n\n提示：您可以选中当前的一级分类，然后点击右侧 "+" 号快速新建子分类。')
+        return toast.warning('⚠️ 请选择具体的【二级子分类】。\n一级分类仅用于归档，不能直接存放提示词。')
+    }
+
+    setUploading(true) // 开始加载状态
+
+    let imageUrl = editingPrompt.result_image || null
+
+    // 1. 如果有新文件，先上传
+    if (selectedFile) {
+      try {
+        const fileExt = selectedFile.name.split('.').pop()
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`
+        const filePath = `${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('prompt-results')
+          .upload(filePath, selectedFile)
+
+        if (uploadError) throw uploadError
+
+        // 获取公开链接
+        const { data: { publicUrl } } = supabase.storage
+          .from('prompt-results')
+          .getPublicUrl(filePath)
+        
+        imageUrl = publicUrl
+      } catch (error) {
+        setUploading(false)
+        return toast.error('图片上传失败: ' + error.message)
+      }
     }
 
     let tagsArr = []
@@ -200,16 +251,23 @@ export default function Home() {
       desc: editingPrompt.desc || '',
       category_id: editingPrompt.categoryId || '',
       tags: tagsArr,
+      result_text: editingPrompt.result_text || '', 
+      result_image: imageUrl, 
       updated_at: new Date()
     }
 
     if (editingPrompt.id) {
       const { error } = await supabase.from('prompts').update(promptData).eq('id', editingPrompt.id)
-      if(error) alert(error.message)
+      if(error) toast.error(error.message)
+      else toast.success('保存成功')
     } else {
       const { error } = await supabase.from('prompts').insert({ ...promptData, user_id: user.id })
-      if(error) alert(error.message)
+      if(error) toast.error(error.message)
+      else toast.success('新建成功')
     }
+    
+    setUploading(false)
+    setSelectedFile(null)
     fetchPrompts()
     setModalMode(null)
   }
@@ -217,19 +275,19 @@ export default function Home() {
   const handleDeletePrompt = async (id) => {
     if (!confirm('确定删除吗？')) return
     await supabase.from('prompts').delete().eq('id', id)
+    toast.success('删除成功')
     fetchPrompts()
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
+    toast.success('已退出登录')
   }
 
   const getFilteredPrompts = () => {
     let list = prompts.filter(p => {
-      // 1. 收藏夹模式
       if (viewMode === 'favorites' && !favorites.includes(p.id)) return false
-      // 2. 我发布的模式
       if (viewMode === 'my_prompts' && p.user_id !== user?.id) return false
 
       let matchCat = false
@@ -312,18 +370,18 @@ export default function Home() {
     }
     const isLevel2 = categories.some(c => c.children?.some(sub => sub.id === currentId));
     if (isLevel2) {
-        return alert('⚠️ 无法新建：当前已选中二级分类。\n\n系统仅支持两级目录结构。如需新建子分类，请先在下拉框中选中对应的一级父分类。');
+        return toast.warning('⚠️ 无法新建：当前已选中二级分类。\n如需新建子分类，请先在下拉框中选中对应的一级父分类。');
     }
   }
 
   const handleInputConfirm = () => {
     const val = inputState.value.trim()
-    if (!val) return alert('名称不能为空')
+    if (!val) return toast.warning('名称不能为空')
     const newCats = JSON.parse(JSON.stringify(categories))
     const isDuplicate = (list, name, excludeId = null) => list.some(item => item.name === name && item.id !== excludeId)
 
     if (inputState.mode === 'quick_add_root') {
-        if (isDuplicate(newCats, val)) return alert('名称已存在！')
+        if (isDuplicate(newCats, val)) return toast.error('名称已存在！')
         const newId = Date.now().toString()
         newCats.push({ id: newId, name: val, icon: '📂', children: [] })
         saveCategoriesToCloud(newCats)
@@ -335,7 +393,7 @@ export default function Home() {
     if (inputState.mode === 'quick_add_child') {
          const parent = newCats.find(c => c.id === inputState.parentId)
          if (parent) {
-            if (isDuplicate(parent.children, val)) return alert('同名子分类已存在！')
+            if (isDuplicate(parent.children, val)) return toast.error('同名子分类已存在！')
             const newId = Date.now().toString()
             parent.children.push({ id: newId, name: val })
             saveCategoriesToCloud(newCats)
@@ -346,12 +404,12 @@ export default function Home() {
     }
 
     if (inputState.mode === 'add_root') {
-      if (isDuplicate(newCats, val)) return alert('名称已存在！')
+      if (isDuplicate(newCats, val)) return toast.error('名称已存在！')
       newCats.push({ id: Date.now().toString(), name: val, icon: '📂', children: [] })
     } else if (inputState.mode === 'add_child') {
       const parent = newCats.find(c => c.id === inputState.parentId)
       if (parent) {
-        if (isDuplicate(parent.children, val)) return alert('同名子分类已存在！')
+        if (isDuplicate(parent.children, val)) return toast.error('同名子分类已存在！')
         parent.children.push({ id: Date.now().toString(), name: val })
       }
     } else if (inputState.mode === 'rename') {
@@ -359,12 +417,12 @@ export default function Home() {
       if (inputState.childId) {
         const child = root.children.find(c => c.id === inputState.childId)
         if (child) {
-          if (isDuplicate(root.children, val, child.id)) return alert('同名分类已存在！')
+          if (isDuplicate(root.children, val, child.id)) return toast.error('同名分类已存在！')
           child.name = val
         }
       } else {
         if (root) {
-          if (isDuplicate(newCats, val, root.id)) return alert('同名分类已存在！')
+          if (isDuplicate(newCats, val, root.id)) return toast.error('同名分类已存在！')
           root.name = val
         }
       }
@@ -407,11 +465,12 @@ export default function Home() {
       </div>
       <div className="admin-table-container">
         <table className="admin-table">
-            <thead><tr><th>用户邮箱</th><th>注册时间</th><th>角色</th><th>操作</th></tr></thead>
+            <thead><tr><th>用户邮箱</th><th>昵称</th><th>注册时间</th><th>角色</th><th>操作</th></tr></thead>
             <tbody>
                 {usersList.map(u => (
                     <tr key={u.id}>
                         <td>{u.email}</td>
+                        <td>{u.nickname || '-'}</td> 
                         <td>{new Date(u.created_at).toLocaleString()}</td>
                         <td><span className={u.role === 'admin' ? 'badge-admin' : 'badge-user'}>{u.role === 'admin' ? '管理员' : '普通用户'}</span></td>
                         <td style={{display:'flex', gap:'10px'}}>
@@ -443,21 +502,102 @@ export default function Home() {
                     >
                         {favorites.includes(p.id) ? Icon.StarFill : Icon.Star}
                     </div>
+                
+                {/* 顶部右上角的小标签 */}
+                {(p.result_text || p.result_image) && (
+                  <div style={{position: 'absolute', top: '15px', right: '40px', display: 'flex', alignItems:'center', gap:'3px'}}>
+                     <span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#10b981'}}></span>
+                     <span style={{fontSize:'12px', color:'#10b981', fontWeight:'500'}}>已验证</span>
+                  </div>
+                )}
 
                 {validTags.length > 0 && <div className="tags" style={{marginTop:'5px'}}>{validTags.map((t, i) => <span key={i} className="tag">{t}</span>)}</div>}
                 <div className="card-body" onClick={() => handleViewDetails(p)} title="点击查看详情">{p.content}</div>
-                <div className="card-footer">
-                    <div style={{display:'flex', gap:'12px', alignItems:'center', color:'#9ca3af', fontSize:'12px'}}>
+                
+                {/* 👇👇👇 核心修复：Footer 允许换行 👇👇👇 */}
+                <div className="card-footer" style={{
+                    display:'flex', 
+                    flexWrap: 'wrap', // ✨ 允许换行！
+                    justifyContent:'space-between', 
+                    alignItems:'center', 
+                    gap: '12px', // 换行后的垂直间距
+                    paddingTop: '10px'
+                }}>
+                    {/* 左侧：信息区（自然宽度，不压缩） */}
+                    <div style={{
+                        display:'flex', 
+                        alignItems:'center', 
+                        gap: '10px',
+                        fontSize: '12px',
+                        color: '#6b7280'
+                    }}>
+                        {/* 昵称 */}
+                        <div style={{
+                            display:'flex', alignItems:'center', gap:'4px',
+                            maxWidth: '120px', // 稍微放宽一点
+                        }} title={`作者: ${p.profiles?.nickname || '匿名'}`}>
+                            <span style={{flexShrink:0}}>👤</span> 
+                            <span style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                            }}>
+                                {p.profiles?.nickname || '匿名'}
+                            </span>
+                        </div>
+                        
+                        {/* 浏览次数 */}
                         <div style={{display:'flex', alignItems:'center', gap:'4px'}} title="浏览次数">{Icon.Eye} {p.view_count || 0}</div>
+                        
+                        {/* 编辑删除按钮 */}
                         {(user.id === p.user_id || isAdmin) && (
-                            <>
-                                <button className="btn-icon" onClick={() => { setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', ') }); setModalMode('prompt') }}>{Icon.Edit}</button>
-                                <button className="btn-icon delete" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button>
-                            </>
+                            <div style={{display:'flex', gap:'8px', marginLeft:'4px'}}>
+                                <button className="btn-icon" title="编辑" onClick={() => { 
+                                  setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', '), result_text: p.result_text, result_image: p.result_image }); 
+                                  setSelectedFile(null); 
+                                  setModalMode('prompt') 
+                                }}>{Icon.Edit}</button>
+                                <button className="btn-icon delete" title="删除" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button>
+                            </div>
                         )}
                     </div>
-                    <button className="btn-copy" onClick={() => {navigator.clipboard.writeText(p.content); alert('已复制')}}>{Icon.Copy} 复制</button>
+                    
+                    {/* 右侧：操作区（自动靠右） */}
+                    <div style={{
+                        display:'flex', 
+                        gap:'8px', 
+                        marginLeft: 'auto' // ✨ 关键：无论换行与否，都靠右对齐
+                    }}>
+                       {(p.result_text || p.result_image) && (
+                         <button 
+                            className="btn-small" 
+                            style={{
+                                backgroundColor: '#ecfdf5',
+                                border: '1px solid #a7f3d0', 
+                                color: '#059669',
+                                display:'flex', alignItems:'center', gap:'4px',
+                                fontWeight: '600',
+                                padding: '4px 10px',
+                                borderRadius: '20px',
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                                height: '32px'
+                            }} 
+                            onClick={(e) => {e.stopPropagation(); handleViewDetails(p)}}
+                         >
+                           {Icon.Beaker} 效果展示
+                         </button>
+                       )}
+                       <button 
+                           className="btn-copy" 
+                           style={{whiteSpace: 'nowrap', height: '32px'}} 
+                           onClick={() => {navigator.clipboard.writeText(p.content); toast.success('复制成功')}}
+                       >
+                           {Icon.Copy} 复制
+                       </button>
+                    </div>
                 </div>
+                {/* 👆👆👆 修复结束 👆👆👆 */}
             </div>
             )
         })}
@@ -466,7 +606,8 @@ export default function Home() {
             <div 
                 className="card" 
                 onClick={() => {
-                    setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '' });
+                    setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '', result_text: '', result_image: '' });
+                    setSelectedFile(null);
                     setModalMode('prompt');
                 }}
                 style={{
@@ -602,7 +743,8 @@ export default function Home() {
                 )}
                 
                 <button className="btn-primary" onClick={() => {
-                    setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '' })
+                    setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '', result_text: '', result_image: '' })
+                    setSelectedFile(null)
                     setModalMode('prompt')
                 }}>
                     {Icon.Plus} 新建
@@ -624,32 +766,91 @@ export default function Home() {
             <div className="modal-header"><span className="modal-title">{editingPrompt.id ? '编辑提示词' : '新建提示词'}</span><span className="modal-close" onClick={() => setModalMode(null)}>×</span></div>
             <div className="modal-body">
                 <div style={{display:'flex', gap:'20px', marginBottom:'20px'}}>
-                <div style={{flex:2}}><label className="form-label">标题</label><input className="form-input" value={editingPrompt.title} onChange={e => setEditingPrompt({...editingPrompt, title: e.target.value})} placeholder="输入标题..." /></div>
-                <div style={{flex:1}}>
-                    <label className="form-label">分类 <span style={{color:'red'}}>*</span></label>
-                    <div style={{display:'flex', gap:'8px', alignItems:'stretch'}}>
-                        <div style={{position: 'relative', flex: 1}}>
-                            <div className="form-select" style={{pointerEvents: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff'}}>
-                                <span>{getSelectedCategoryName(editingPrompt.categoryId)}</span>
-                                <span style={{color:'#6b7280'}}>{Icon.ChevronDown}</span>
-                            </div>
-                            <select value={editingPrompt.categoryId} onChange={e => setEditingPrompt({...editingPrompt, categoryId: e.target.value})} style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'}}>
-                                <option value="">-- 请选择 --</option>
-                                {categories.map(c => [
-                                    <option key={c.id} value={c.id} style={{fontWeight:'bold', color:'#111827'}}>{c.icon || '📂'} {c.name}</option>,
-                                    ...c.children.map(sub => (<option key={sub.id} value={sub.id} style={{color:'#4b5563'}}>&nbsp;&nbsp;&nbsp;&nbsp;└ {sub.name}</option>))
-                                ])}
-                            </select>
-                        </div>
-                        <button className="btn-icon" style={{border:'1px solid #d1d5db', borderRadius:'6px', width:'38px', height:'38px', display:'flex', alignItems:'center', justifyContent:'center', background:'#f9fafb'}} onClick={handleQuickAddClick} title="快速新建分类">{Icon.Plus}</button>
-                    </div>
-                </div>
+                  <div style={{flex:2}}><label className="form-label">标题</label><input className="form-input" value={editingPrompt.title} onChange={e => setEditingPrompt({...editingPrompt, title: e.target.value})} placeholder="输入标题..." /></div>
+                  <div style={{flex:1}}>
+                      <label className="form-label">分类 <span style={{color:'red'}}>*</span></label>
+                      <div style={{display:'flex', gap:'8px', alignItems:'stretch'}}>
+                          <div style={{position: 'relative', flex: 1}}>
+                              <div className="form-select" style={{pointerEvents: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff'}}>
+                                  <span>{getSelectedCategoryName(editingPrompt.categoryId)}</span>
+                                  <span style={{color:'#6b7280'}}>{Icon.ChevronDown}</span>
+                              </div>
+                              <select value={editingPrompt.categoryId} onChange={e => setEditingPrompt({...editingPrompt, categoryId: e.target.value})} style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'}}>
+                                  <option value="">-- 请选择 --</option>
+                                  {categories.map(c => [
+                                      <option key={c.id} value={c.id} style={{fontWeight:'bold', color:'#111827'}}>{c.icon || '📂'} {c.name}</option>,
+                                      ...c.children.map(sub => (<option key={sub.id} value={sub.id} style={{color:'#4b5563'}}>&nbsp;&nbsp;&nbsp;&nbsp;└ {sub.name}</option>))
+                                  ])}
+                              </select>
+                          </div>
+                          <button className="btn-icon" style={{border:'1px solid #d1d5db', borderRadius:'6px', width:'38px', height:'38px', display:'flex', alignItems:'center', justifyContent:'center', background:'#f9fafb'}} onClick={handleQuickAddClick} title="快速新建分类">{Icon.Plus}</button>
+                      </div>
+                  </div>
                 </div>
                 <div className="form-group"><label className="form-label">描述</label><input className="form-input" value={editingPrompt.desc} onChange={e => setEditingPrompt({...editingPrompt, desc: e.target.value})} /></div>
                 <div className="form-group"><label className="form-label">标签</label><input className="form-input" value={editingPrompt.tags} onChange={e => setEditingPrompt({...editingPrompt, tags: e.target.value})} /></div>
                 <div className="form-group" style={{flex:1, display:'flex', flexDirection:'column', marginBottom:0}}><label className="form-label">内容</label><textarea className="form-textarea" value={editingPrompt.content} onChange={e => setEditingPrompt({...editingPrompt, content: e.target.value})}></textarea></div>
+                
+                {/* 新增：运行效果区域 */}
+                <div style={{marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed #e5e7eb'}}>
+                  <label className="form-label" style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                    {Icon.Beaker} 运行效果验证 (可选)
+                    <span style={{fontSize:'12px', color:'#9ca3af', fontWeight:'normal'}}>上传截图或文字心得，证明该提示词真实有效</span>
+                  </label>
+                  
+                  <div style={{display:'flex', gap:'20px'}}>
+                    <div style={{flex:1}}>
+                      <textarea 
+                        className="form-textarea" 
+                        placeholder="在此记录运行结果、模型回复摘要或使用心得..." 
+                        style={{height:'80px', fontSize:'13px'}}
+                        value={editingPrompt.result_text || ''}
+                        onChange={e => setEditingPrompt({...editingPrompt, result_text: e.target.value})}
+                      ></textarea>
+                    </div>
+                    <div style={{width:'200px'}}>
+                       <div 
+                         style={{
+                           border: '2px dashed #d1d5db', borderRadius: '8px', height: '80px', 
+                           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                           cursor: 'pointer', backgroundColor: '#f9fafb', color: '#6b7280', fontSize: '12px', position: 'relative'
+                         }}
+                         onClick={() => fileInputRef.current?.click()}
+                       >
+                         {uploading ? (
+                           <span>上传中...</span>
+                         ) : (
+                           <>
+                             {editingPrompt.result_image || selectedFile ? (
+                               <div style={{width:'100%', height:'100%', overflow:'hidden', borderRadius:'6px'}}>
+                                  {/* 优先显示新选的文件预览，否则显示旧图 */}
+                                  {selectedFile ? (
+                                    <div style={{paddingTop:'25px'}}>已选择文件<br/>{selectedFile.name.slice(0,10)}...</div>
+                                  ) : (
+                                    <img src={editingPrompt.result_image} style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                                  )}
+                               </div>
+                             ) : (
+                               <>
+                                 <span style={{marginBottom:'4px'}}>{Icon.Upload}</span>
+                                 <span>上传截图</span>
+                               </>
+                             )}
+                           </>
+                         )}
+                         <input type="file" ref={fileInputRef} accept="image/*" style={{display:'none'}} onChange={handleFileChange} />
+                       </div>
+                    </div>
+                  </div>
+                </div>
+
             </div>
-            <div className="modal-footer"><button className="btn-cancel" onClick={() => setModalMode(null)}>取消</button><button className="btn-primary" onClick={handleSavePrompt}>保存</button></div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setModalMode(null)}>取消</button>
+              <button className="btn-primary" onClick={handleSavePrompt} disabled={uploading}>
+                {uploading ? '保存中...' : '保存'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -665,7 +866,28 @@ export default function Home() {
                     {getValidTags(viewingPrompt.tags).length > 0 && <span style={{background:'#eff6ff', color:'#2563eb', padding:'4px 8px', borderRadius:'4px', fontSize:'12px'}}>🏷️ {getValidTags(viewingPrompt.tags).join(', ')}</span>}
                 </div>
                 {viewingPrompt.desc && <div style={{fontSize:'13px', color:'#1e40af', background:'#eff6ff', padding:'12px', borderRadius:'8px', marginBottom:'20px'}}>ℹ️ {viewingPrompt.desc}</div>}
+                
                 <div className="view-content-box">{viewingPrompt.content}</div>
+
+                {/* 新增：查看详情时的效果展示 */}
+                {(viewingPrompt.result_text || viewingPrompt.result_image) && (
+                  <div style={{marginTop:'20px', padding:'15px', border:'1px solid #d1fae5', background:'#ecfdf5', borderRadius:'8px'}}>
+                    <div style={{fontWeight:'bold', color:'#047857', marginBottom:'10px', display:'flex', alignItems:'center', gap:'6px'}}>
+                      {Icon.Beaker} 运行效果验证
+                    </div>
+                    {viewingPrompt.result_text && (
+                      <div style={{fontSize:'14px', color:'#065f46', marginBottom: viewingPrompt.result_image ? '15px' : '0', whiteSpace:'pre-wrap'}}>
+                        {viewingPrompt.result_text}
+                      </div>
+                    )}
+                    {viewingPrompt.result_image && (
+                      <div style={{marginTop:'10px'}}>
+                        <img src={viewingPrompt.result_image} style={{maxWidth:'100%', maxHeight:'300px', borderRadius:'8px', border:'1px solid #a7f3d0'}} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div style={{marginTop:'30px', borderTop:'1px solid #eee', paddingTop:'20px'}}>
                     <div style={{textAlign:'center', marginBottom:'15px', fontSize:'14px', color:'#6b7280', fontWeight:500}}>🚀 一键复制并跳转使用</div>
                     <div style={{display:'flex', gap:'15px', justifyContent:'center', flexWrap:'wrap'}}>
@@ -679,8 +901,8 @@ export default function Home() {
                 </div>
             </div>
             <div className="modal-footer">
-               {(user.id === viewingPrompt.user_id || isAdmin) && <button className="btn-cancel" onClick={() => { setEditingPrompt({ ...viewingPrompt, categoryId: viewingPrompt.category_id, tags: getValidTags(viewingPrompt.tags).join(', ') }); setModalMode('prompt') }}>✎ 编辑</button>}
-               <button className="btn-primary" onClick={() => {navigator.clipboard.writeText(viewingPrompt.content); alert('已复制')}}>复制内容</button>
+               {(user.id === viewingPrompt.user_id || isAdmin) && <button className="btn-cancel" onClick={() => { setEditingPrompt({ ...viewingPrompt, categoryId: viewingPrompt.category_id, tags: getValidTags(viewingPrompt.tags).join(', '), result_text: viewingPrompt.result_text, result_image: viewingPrompt.result_image }); setSelectedFile(null); setModalMode('prompt') }}>✎ 编辑</button>}
+               <button className="btn-primary" onClick={() => {navigator.clipboard.writeText(viewingPrompt.content); toast.success('复制成功')}}>复制内容</button>
             </div>
           </div>
         </div>
@@ -723,7 +945,6 @@ export default function Home() {
         <div className="modal-overlay">
           <div className="modal-normal">
             <div className="modal-header">
-                {/* 动态显示标题 */}
                 <span className="modal-title">{inputState.promptTitle || '请输入名称'}</span>
                 <span className="modal-close" onClick={() => setModalMode((inputState.mode.startsWith('quick_') ? 'prompt' : 'category'))}>×</span>
             </div>
