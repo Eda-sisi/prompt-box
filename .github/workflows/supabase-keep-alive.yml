@@ -2,17 +2,43 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # 每 3 天的凌晨 0 点运行一次 (Cron 语法)
-    # 只要在 7 天内有活动即可，不需要每天运行
-    - cron: '0 0 */3 * *'
-  workflow_dispatch: # 允许你手动点击测试
+    # 每天早上 8 点运行一次 (UTC时间 0点)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 允许手动点按钮运行
 
 jobs:
-  ping_supabase:
+  wake_up:
     runs-on: ubuntu-latest
     steps:
-      - name: Send API Request to Supabase
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Call Supabase API
+        # 这里使用 curl 模拟一次真实的数据库查询请求
+        # 请确保你已经在 GitHub Secrets 里配置了 SUPABASE_URL 和 SUPABASE_ANON_KEY
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/?apikey=${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -I
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Supabase 唤醒成功 (HTTP 200)"
+          else
+            echo "❌ 唤醒可能失败，状态码: $response"
+            # 注意：即使失败也不要让 Action 报错停止，以便后续步骤能提交代码保活
+          fi
+
+      - name: Keep GitHub Action Alive (Auto Commit)
+        # 这一步是为了防止 GitHub 因为仓库 60 天无活动而禁用定时任务
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          
+          # 更新一个日志文件，产生变动
+          echo "Last run: $(date)" > keep_alive_log.txt
+          
+          # 提交变动
+          git add keep_alive_log.txt
+          git commit -m "Auto keep-alive: $(date)" || echo "No changes to commit"
+          git push
