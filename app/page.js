@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-// --- 1. 图标组件库 ---
+// --- 1. 图标组件库 (新增大拇指图标) ---
 const Icon = {
   Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink: 0}}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
   Search: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -17,6 +17,9 @@ const Icon = {
   Home: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
   Star: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
   StarFill: <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+  // 改为大拇指图标
+  ThumbsUp: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>,
+  ThumbsUpFill: <svg width="20" height="20" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>,
   ChevronDown: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>,
   Beaker: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4.5 3h15"></path><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"></path><path d="M6 14h12"></path></svg>,
   Upload: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
@@ -24,6 +27,8 @@ const Icon = {
   Paperclip: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>,
   Trash: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
   Expand: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>,
+  TrendingUp: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>,
+  Award: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>,
   FileWord: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>,
   FileExcel: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="17"></line><line x1="16" y1="13" x2="8" y2="17"></line></svg>,
   FilePdf: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>,
@@ -61,6 +66,7 @@ export default function Home() {
   const [catRecordId, setCatRecordId] = useState(null)
   const [usersList, setUsersList] = useState([])
   const [favorites, setFavorites] = useState([]) 
+  const [likedIds, setLikedIds] = useState([]) 
   
   const [selectedId, setSelectedId] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -101,6 +107,11 @@ export default function Home() {
         setFavorites(favData.map(f => f.prompt_id))
       }
 
+      const { data: likeData } = await supabase.from('likes').select('prompt_id')
+      if (likeData) {
+        setLikedIds(likeData.map(l => l.prompt_id))
+      }
+
       await fetchPrompts()
       setLoading(false)
     }
@@ -112,7 +123,8 @@ export default function Home() {
     if (data) {
         const cleaned = data.map(p => ({
             ...p,
-            result_images: p.result_images || (p.result_image ? [p.result_image] : [])
+            result_images: p.result_images || (p.result_image ? [p.result_image] : []),
+            like_count: p.like_count || 0
         }))
         setPrompts(cleaned)
     }
@@ -144,6 +156,26 @@ export default function Home() {
       setFavorites(prev => [...prev, prompt.id])
       await supabase.from('favorites').insert({ prompt_id: prompt.id, user_id: user.id })
       toast.success('已加入收藏')
+    }
+  }
+
+  const toggleLike = async (e, prompt) => {
+    e.stopPropagation()
+    const isLiked = likedIds.includes(prompt.id)
+    const newCount = isLiked ? (prompt.like_count - 1) : (prompt.like_count + 1)
+    
+    setLikedIds(prev => isLiked ? prev.filter(id => id !== prompt.id) : [...prev, prompt.id])
+    setPrompts(prev => prev.map(p => p.id === prompt.id ? { ...p, like_count: newCount } : p))
+
+    try {
+        if (isLiked) {
+            await supabase.from('likes').delete().match({ prompt_id: prompt.id, user_id: user.id })
+        } else {
+            await supabase.from('likes').insert({ prompt_id: prompt.id, user_id: user.id })
+        }
+        await supabase.from('prompts').update({ like_count: newCount }).eq('id', prompt.id)
+    } catch (err) {
+        toast.error("操作失败")
     }
   }
 
@@ -209,17 +241,15 @@ export default function Home() {
     toast.success('分类已删除')
   }
 
-  // --- 核心修复：文件识别与命名 (增强版) ---
+  // --- 辅助函数 ---
   const checkIsImage = (url) => {
     if (!url) return false
-    // 去掉参数再判断
     const cleanUrl = url.split('?')[0].toLowerCase()
     return cleanUrl.match(/\.(jpeg|jpg|gif|png|webp|bmp|svg)$/) != null
   }
 
   const getFileType = (url) => {
     if (!url) return 'generic'
-    // 去掉参数再判断
     const cleanUrl = url.split('?')[0].toLowerCase()
     if (cleanUrl.match(/\.(doc|docx)$/)) return 'word'
     if (cleanUrl.match(/\.(xls|xlsx|csv)$/)) return 'excel'
@@ -238,15 +268,12 @@ export default function Home() {
     }
   }
 
-  // ✨ 关键修复：从 URL 参数中提取原始文件名
   const getFileNameFromUrl = (url) => {
     try {
         const urlObj = new URL(url)
-        // 1. 优先尝试从 ?name= 参数里拿，这是我们自己存的真名
         const nameParam = urlObj.searchParams.get('name')
         if (nameParam) return decodeURIComponent(nameParam)
         
-        // 2. 如果没有参数，才去解析路径（兼容旧文件）
         let filename = urlObj.pathname.split('/').pop()
         const parts = filename.split('_')
         if (parts.length > 1 && /^\d+$/.test(parts[0])) {
@@ -263,8 +290,6 @@ export default function Home() {
     const file = e.target.files[0]
     setUploading(true)
     try {
-        // ✨ 终极修复：为了绝对安全，上传时我们用【随机英文名】作为存储 Key
-        // 这样 Supabase 永远不会报错 Invalid Key
         const fileExt = file.name.split('.').pop()
         const randomName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`
         
@@ -272,9 +297,6 @@ export default function Home() {
         if (uploadError) throw uploadError
         
         const { data: { publicUrl } } = supabase.storage.from('prompt-results').getPublicUrl(randomName)
-        
-        // ✨ 关键：把【原始中文名】拼接到 URL 参数里！
-        // 这样数据库存的是: https://.../123_abc.docx?name=我的需求文档.docx
         const finalUrl = `${publicUrl}?name=${encodeURIComponent(file.name)}`
         
         setEditingPrompt(prev => ({ ...prev, result_images: [...(prev.result_images || []), finalUrl] }))
@@ -296,20 +318,29 @@ export default function Home() {
   }
 
   const handleSavePrompt = async () => {
-    if (!editingPrompt.title || !editingPrompt.content || !editingPrompt.categoryId) {
-        return toast.error('请填写完整：标题、分类和内容均为必填项')
+    const hasResult = editingPrompt.result_text || (editingPrompt.result_images && editingPrompt.result_images.length > 0)
+    
+    if (!editingPrompt.title || !editingPrompt.content || !editingPrompt.categoryId || !editingPrompt.desc || !hasResult) {
+        return toast.error('请填写完整：标题、分类、场景描述、内容及运行效果均为必填项')
     }
+
     const isRoot = categories.some(c => c.id === editingPrompt.categoryId)
     if (isRoot) {
         return toast.warning('⚠️ 请选择具体的【二级子分类】。\n一级分类仅用于归档，不能直接存放提示词。')
     }
+    
     let tagsArr = []
     if (editingPrompt.tags) tagsArr = Array.isArray(editingPrompt.tags) ? editingPrompt.tags : editingPrompt.tags.split(/[,，]/).map(t => t.trim()).filter(t => t)
     
     const promptData = {
-      title: editingPrompt.title, content: editingPrompt.content, desc: editingPrompt.desc || '',
-      category_id: editingPrompt.categoryId || '', tags: tagsArr,
-      result_text: editingPrompt.result_text || '', result_images: editingPrompt.result_images || [], updated_at: new Date()
+      title: editingPrompt.title, 
+      content: editingPrompt.content, 
+      desc: editingPrompt.desc || '',
+      category_id: editingPrompt.categoryId || '', 
+      tags: tagsArr,
+      result_text: editingPrompt.result_text || '', 
+      result_images: editingPrompt.result_images || [], 
+      updated_at: new Date()
     }
 
     if (editingPrompt.id) {
@@ -317,7 +348,7 @@ export default function Home() {
       if(error) toast.error(error.message)
       else toast.success('保存成功')
     } else {
-      const { error } = await supabase.from('prompts').insert({ ...promptData, user_id: user.id })
+      const { error } = await supabase.from('prompts').insert({ ...promptData, user_id: user.id, like_count: 0 })
       if(error) toast.error(error.message)
       else toast.success('新建成功')
     }
@@ -358,6 +389,7 @@ export default function Home() {
       return matchCat && matchSearch
     })
     list.sort((a, b) => {
+      if (sortType === 'likes') return (b.like_count || 0) - (a.like_count || 0)
       if (sortType === 'hot') return (b.view_count || 0) - (a.view_count || 0)
       const tA = new Date(a.updated_at).getTime()
       const tB = new Date(b.updated_at).getTime()
@@ -439,28 +471,69 @@ export default function Home() {
 
   // --- 核心渲染函数 ---
 
-  const renderHome = () => (
-    <div className="content-area">
-      <h2 style={{fontSize:'20px', fontWeight:'bold', marginBottom:'20px', paddingLeft:'20px'}}>📚 提示词概览</h2>
-      <div className="dashboard-grid">
-        <div className="stack-card" onClick={() => { setSelectedId('all'); setViewMode('list') }}>
-            <div className="stack-icon">🏠</div>
-            <div className="stack-title">全部提示词</div>
-            <div className="stack-count">{prompts.length} 个</div>
-        </div>
-        {categories.map(cat => {
-            let count = getCategoryCount(cat.id); cat.children.forEach(sub => { count += getCategoryCount(sub.id) });
-            return (
-                <div key={cat.id} className="stack-card" onClick={() => { setSelectedId(cat.children?.[0]?.id || cat.id); setExpandedCats(prev => ({...prev, [cat.id]: true})); setViewMode('list') }}>
-                    <div className="stack-icon">{cat.icon || '📂'}</div>
-                    <div className="stack-title">{cat.name}</div>
-                    <div className="stack-count">{count} 个</div>
+  const renderHome = () => {
+    // 统计计算
+    const totalPrompts = prompts.length
+    const myPromptsCount = prompts.filter(p => p.user_id === user?.id).length
+    
+    // 本周新增计算 (全平台)
+    const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+    const weeklyNewCount = prompts.filter(p => new Date(p.created_at) > oneWeekAgo).length
+    
+    // 全站总点赞
+    const platformTotalLikes = prompts.reduce((sum, p) => sum + (p.like_count || 0), 0)
+
+    return (
+      <div className="content-area">
+        {/* 数据仪表盘 */}
+        <div style={{display:'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px', paddingLeft: '20px', paddingRight: '20px'}}>
+            <div className="stat-card">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
+                    <div><div style={{color:'#64748b', fontSize:'13px', fontWeight:'500'}}>本周新增</div><div style={{fontSize:'24px', fontWeight:'bold', color:'#3b82f6', marginTop:'4px'}}>{weeklyNewCount}</div></div>
+                    <div style={{padding:'8px', background:'#eff6ff', borderRadius:'8px', color:'#3b82f6'}}>{Icon.TrendingUp}</div>
                 </div>
-            )
-        })}
+            </div>
+            <div className="stat-card">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
+                    <div><div style={{color:'#64748b', fontSize:'13px', fontWeight:'500'}}>我的贡献</div><div style={{fontSize:'24px', fontWeight:'bold', color:'#10b981', marginTop:'4px'}}>{myPromptsCount}</div></div>
+                    <div style={{padding:'8px', background:'#ecfdf5', borderRadius:'8px', color:'#10b981'}}>{Icon.Edit}</div>
+                </div>
+            </div>
+            <div className="stat-card">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
+                    <div><div style={{color:'#64748b', fontSize:'13px', fontWeight:'500'}}>全站点赞</div><div style={{fontSize:'24px', fontWeight:'bold', color:'#ef4444', marginTop:'4px'}}>{platformTotalLikes}</div></div>
+                    <div style={{padding:'8px', background:'#fef2f2', borderRadius:'8px', color:'#ef4444'}}>{Icon.ThumbsUpFill}</div>
+                </div>
+            </div>
+            <div className="stat-card">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
+                    <div><div style={{color:'#64748b', fontSize:'13px', fontWeight:'500'}}>总收录</div><div style={{fontSize:'24px', fontWeight:'bold', color:'#8b5cf6', marginTop:'4px'}}>{totalPrompts}</div></div>
+                    <div style={{padding:'8px', background:'#f5f3ff', borderRadius:'8px', color:'#8b5cf6'}}>{Icon.Award}</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style={{fontSize:'20px', fontWeight:'bold', marginBottom:'20px', paddingLeft:'20px'}}>📚 提示词分类</h2>
+        <div className="dashboard-grid">
+          <div className="stack-card" onClick={() => { setSelectedId('all'); setViewMode('list') }}>
+              <div className="stack-icon">🏠</div>
+              <div className="stack-title">全部提示词</div>
+              <div className="stack-count">{prompts.length} 个</div>
+          </div>
+          {categories.map(cat => {
+              let count = getCategoryCount(cat.id); cat.children.forEach(sub => { count += getCategoryCount(sub.id) });
+              return (
+                  <div key={cat.id} className="stack-card" onClick={() => { setSelectedId(cat.children?.[0]?.id || cat.id); setExpandedCats(prev => ({...prev, [cat.id]: true})); setViewMode('list') }}>
+                      <div className="stack-icon">{cat.icon || '📂'}</div>
+                      <div className="stack-title">{cat.name}</div>
+                      <div className="stack-count">{count} 个</div>
+                  </div>
+              )
+          })}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderAdminPanel = () => (
     <div className="content-area">
@@ -492,22 +565,58 @@ export default function Home() {
             const hasEffect = p.result_text || (p.result_images && p.result_images.length > 0)
             return (
             <div key={p.id} className="card" style={{position: 'relative'}}>
-                <div className="card-header">
-                    <div className="card-title" onClick={() => handleViewDetails(p, false)} title={p.title} style={{paddingRight: '30px'}}>{p.title}</div>
+                {/* 顶部右上角 */}
+                <div style={{position: 'absolute', top: '12px', right: '12px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 10}}>
+                    {hasEffect && <span style={{background:'#ecfdf5', color:'#059669', fontSize:'11px', padding:'2px 6px', borderRadius:'4px', border:'1px solid #a7f3d0', fontWeight:'500'}}>已验证</span>}
+                    <div 
+                        onClick={(e) => toggleLike(e, p)} 
+                        style={{cursor: 'pointer', color: likedIds.includes(p.id) ? '#ef4444' : '#d1d5db', display:'flex', alignItems:'center', gap:'2px', fontSize:'12px', fontWeight:'500'}}
+                        title={likedIds.includes(p.id) ? "取消点赞" : "点赞"}
+                    >
+                        {likedIds.includes(p.id) ? Icon.ThumbsUpFill : Icon.ThumbsUp} <span>{p.like_count || 0}</span>
+                    </div>
+                    <div onClick={(e) => toggleFavorite(e, p)} style={{cursor: 'pointer', color: favorites.includes(p.id) ? '#f59e0b' : '#d1d5db', display:'flex'}} title={favorites.includes(p.id) ? "取消收藏" : "收藏"}>{favorites.includes(p.id) ? Icon.StarFill : Icon.Star}</div>
                 </div>
-                <div onClick={(e) => toggleFavorite(e, p)} style={{position: 'absolute', top: '12px', right: '12px', cursor: 'pointer', padding: '4px', color: favorites.includes(p.id) ? '#f59e0b' : '#9ca3af', zIndex: 10}} title={favorites.includes(p.id) ? "取消收藏" : "收藏"}>{favorites.includes(p.id) ? Icon.StarFill : Icon.Star}</div>
-                {hasEffect && <div style={{position: 'absolute', top: '15px', right: '40px', display: 'flex', alignItems:'center', gap:'3px'}}><span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#10b981'}}></span><span style={{fontSize:'12px', color:'#10b981', fontWeight:'500'}}>已验证</span></div>}
+
+                <div className="card-header">
+                    <div className="card-title" onClick={() => handleViewDetails(p, false)} title={p.title} style={{paddingRight: '100px'}}>{p.title}</div>
+                </div>
+                
                 {validTags.length > 0 && <div className="tags" style={{marginTop:'5px'}}>{validTags.map((t, i) => <span key={i} className="tag">{t}</span>)}</div>}
                 <div className="card-body" onClick={() => handleViewDetails(p, false)} title="点击查看详情">{p.content}</div>
                 
-                <div className="card-footer" style={{display:'flex', flexWrap: 'wrap', justifyContent:'space-between', alignItems:'center', gap: '12px', paddingTop: '10px'}}>
-                    <div style={{display:'flex', alignItems:'center', gap: '10px', fontSize: '12px', color: '#6b7280'}}>
-                        <div style={{display:'flex', alignItems:'center', gap:'4px', maxWidth: '120px'}} title={`作者: ${p.profiles?.nickname || '匿名'}`}><span style={{flexShrink:0}}>👤</span><span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{p.profiles?.nickname || '匿名'}</span></div>
-                        <div style={{display:'flex', alignItems:'center', gap:'4px'}} title="浏览次数">{Icon.Eye} {p.view_count || 0}</div>
-                        {(user.id === p.user_id || isAdmin) && (<div style={{display:'flex', gap:'8px', marginLeft:'4px'}}><button className="btn-icon" title="编辑" onClick={() => { setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', '), result_text: p.result_text, result_images: p.result_images }); setModalMode('prompt') }}>{Icon.Edit}</button><button className="btn-icon delete" title="删除" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button></div>)}
+                {/* ✨ 核心修复：Footer 允许换行 + 左侧自然撑开 + 右侧自动靠右 ✨ */}
+                <div className="card-footer" style={{
+                    display:'flex', 
+                    flexWrap:'wrap', 
+                    alignItems:'center', 
+                    justifyContent:'space-between', 
+                    gap:'10px', 
+                    paddingTop:'10px'
+                }}>
+                    {/* 左侧：信息区 (自然宽度) */}
+                    <div style={{
+                        display:'flex', 
+                        alignItems:'center', 
+                        gap:'8px', 
+                        color:'#6b7280', 
+                        fontSize:'12px',
+                    }}>
+                        <div style={{display:'flex', alignItems:'center', gap:'4px'}} title={`作者: ${p.profiles?.nickname || '匿名'}`}>
+                            <span style={{flexShrink:0}}>👤</span><span>{p.profiles?.nickname || '匿名'}</span>
+                        </div>
+                        <div style={{display:'flex', alignItems:'center', gap:'4px', flexShrink:0}} title="浏览次数">{Icon.Eye} {p.view_count || 0}</div>
+                        {(user.id === p.user_id || isAdmin) && (<div style={{display:'flex', gap:'8px', marginLeft:'4px', flexShrink:0}}><button className="btn-icon" title="编辑" onClick={() => { setEditingPrompt({ ...p, categoryId: p.category_id || '', tags: getValidTags(p.tags).join(', '), result_text: p.result_text, result_images: p.result_images, desc: p.desc }); setModalMode('prompt') }}>{Icon.Edit}</button><button className="btn-icon delete" title="删除" onClick={() => handleDeletePrompt(p.id)}>{Icon.Delete}</button></div>)}
                     </div>
-                    <div style={{display:'flex', gap:'8px', marginLeft: 'auto'}}>
-                       {hasEffect && <button className="btn-small" style={{backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', display:'flex', alignItems:'center', gap:'4px', fontWeight: '600', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', whiteSpace: 'nowrap', height: '32px'}} onClick={(e) => {e.stopPropagation(); handleViewDetails(p, true)}}>{Icon.Beaker} 效果展示</button>}
+                    
+                    {/* 右侧：按钮区 (marginLeft: auto 实现自动靠右对齐) */}
+                    <div style={{
+                        display:'flex', 
+                        gap:'8px', 
+                        flexShrink:0,
+                        marginLeft: 'auto' 
+                    }}>
+                       {hasEffect && <button className="btn-small" style={{backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', display:'flex', alignItems:'center', gap:'4px', fontWeight: '600', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', whiteSpace: 'nowrap', height: '32px'}} onClick={(e) => {e.stopPropagation(); handleViewDetails(p, true)}}>效果展示</button>}
                        <button className="btn-copy" style={{whiteSpace: 'nowrap', height: '32px'}} onClick={() => {navigator.clipboard.writeText(p.content); toast.success('复制成功')}}>{Icon.Copy} 复制</button>
                     </div>
                 </div>
@@ -566,7 +675,7 @@ export default function Home() {
           {(viewMode === 'list' || viewMode === 'favorites' || viewMode === 'home' || viewMode === 'my_prompts') && (
             <div className="toolbar">
                 <div className="search-box" style={{display:'flex', alignItems:'center', border:'1px solid #e5e7eb', borderRadius:'8px', padding:'6px 12px', background:'white', width: '300px', gap:'8px'}}><input type="text" className="search-input" placeholder="搜索..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); if (viewMode === 'home' && e.target.value.trim() !== '') { setViewMode('list'); setSelectedId('all'); } }} style={{border:'none', outline:'none', flex:1, fontSize:'14px', color:'#374151'}} /><div style={{color:'#9ca3af', display:'flex'}}>{Icon.Search}</div></div>
-                {viewMode !== 'home' && (<select className="sort-select" value={sortType} onChange={e => setSortType(e.target.value)}><option value="time_desc">🕒 最新修改</option><option value="hot">🔥 最多查看</option><option value="name_asc">🔤 名称 (A-Z)</option></select>)}
+                {viewMode !== 'home' && (<select className="sort-select" value={sortType} onChange={e => setSortType(e.target.value)}><option value="time_desc">🕒 最新修改</option><option value="likes">👍 最多点赞</option><option value="hot">🔥 最多查看</option><option value="name_asc">🔤 名称 (A-Z)</option></select>)}
                 <button className="btn-primary" onClick={() => { setEditingPrompt({ title: '', content: '', desc: '', tags: '', categoryId: selectedId !== 'all' ? selectedId : '', result_text: '', result_images: [] }); setModalMode('prompt') }}>{Icon.Plus} 新建</button>
             </div>
           )}
@@ -583,7 +692,7 @@ export default function Home() {
             <div className="modal-header"><span className="modal-title">{editingPrompt.id ? '编辑提示词' : '新建提示词'}</span><span className="modal-close-btn" onClick={() => setModalMode(null)}>×</span></div>
             <div className="modal-body">
                 <div style={{display:'flex', gap:'20px', marginBottom:'20px'}}>
-                  <div style={{flex:2}}><label className="form-label">标题</label><input className="form-input" value={editingPrompt.title} onChange={e => setEditingPrompt({...editingPrompt, title: e.target.value})} placeholder="输入标题..." /></div>
+                  <div style={{flex:2}}><label className="form-label">标题 <span style={{color:'red'}}>*</span></label><input className="form-input" value={editingPrompt.title} onChange={e => setEditingPrompt({...editingPrompt, title: e.target.value})} placeholder="输入标题..." /></div>
                   <div style={{flex:1}}>
                       <label className="form-label">分类 <span style={{color:'red'}}>*</span></label>
                       <div style={{display:'flex', gap:'8px', alignItems:'stretch'}}>
@@ -595,11 +704,11 @@ export default function Home() {
                       </div>
                   </div>
                 </div>
-                <div className="form-group"><label className="form-label">描述</label><input className="form-input" value={editingPrompt.desc} onChange={e => setEditingPrompt({...editingPrompt, desc: e.target.value})} /></div>
+                <div className="form-group"><label className="form-label">使用场景描述 <span style={{color:'red'}}>*</span></label><input className="form-input" value={editingPrompt.desc} onChange={e => setEditingPrompt({...editingPrompt, desc: e.target.value})} /></div>
                 <div className="form-group"><label className="form-label">标签</label><input className="form-input" value={editingPrompt.tags} onChange={e => setEditingPrompt({...editingPrompt, tags: e.target.value})} /></div>
-                <div className="form-group" style={{flex:1, display:'flex', flexDirection:'column', marginBottom:0}}><label className="form-label">内容</label><textarea className="form-textarea" value={editingPrompt.content} onChange={e => setEditingPrompt({...editingPrompt, content: e.target.value})}></textarea></div>
+                <div className="form-group" style={{flex:1, display:'flex', flexDirection:'column', marginBottom:0}}><label className="form-label">内容 <span style={{color:'red'}}>*</span></label><textarea className="form-textarea" value={editingPrompt.content} onChange={e => setEditingPrompt({...editingPrompt, content: e.target.value})}></textarea></div>
                 <div style={{marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed #e5e7eb'}}>
-                  <label className="form-label" style={{display:'flex', alignItems:'center', gap:'8px'}}>{Icon.Beaker} 运行效果/附件 (可选)</label>
+                  <label className="form-label" style={{display:'flex', alignItems:'center', gap:'8px'}}>{Icon.Beaker} 运行效果/附件 <span style={{color:'red'}}>*</span></label>
                   <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
                     <textarea className="form-textarea" placeholder="在此记录运行结果、模型回复摘要或使用心得..." style={{height:'60px', fontSize:'13px'}} value={editingPrompt.result_text || ''} onChange={e => setEditingPrompt({...editingPrompt, result_text: e.target.value})}></textarea>
                     <div style={{display:'flex', flexWrap:'wrap', gap:'10px'}}>
@@ -774,6 +883,11 @@ export default function Home() {
       )}
       
       <style jsx global>{`
+        .stat-card {
+            background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s ease;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .modal-close-btn {
             width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9;
             display: flex; align-items: center; justify-content: center;

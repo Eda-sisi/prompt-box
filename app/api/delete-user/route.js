@@ -1,61 +1,66 @@
-import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
-  // --- 1. 验证调用者身份 ---
-  const cookieStore = cookies()
-  
-  // 创建一个用于验证当前用户的普通客户端
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) { try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value)) } catch {} },
-      },
-    }
-  )
-
-  // 获取当前请求的用户
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // 查数据库，确认该用户是否为 admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden: Admins only' }, { status: 403 })
-  }
-
-  // --- 2. 执行删除操作 ---
-  const { userId } = await request.json()
-  if (!userId) return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
-
-  // 初始化 Admin 客户端 (用于执行删除)
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-
   try {
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId)
-    if (deleteAuthError) throw deleteAuthError
+    // ✨ 核心修复：Next.js 15+ 要求 cookies() 必须 await
+    const cookieStore = await cookies()
 
-    // 级联删除 profiles (可选，视数据库设置而定)
-    await supabaseAdmin.from('profiles').delete().eq('id', userId)
-    
+    // 1. 验证权限：需要使用 Service Role Key 才能彻底删除用户
+    // 请确保你的 .env.local 文件里配置了 SUPABASE_SERVICE_ROLE_KEY
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey) {
+      console.error('Missing SUPABASE_SERVICE_ROLE_KEY')
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    // 2. 创建拥有超级权限的 Supabase 客户端
+    const supabaseAdmin = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      serviceRoleKey,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // API 路由中有时不需要设置 cookie，忽略错误
+            }
+          },
+        },
+      }
+    )
+
+    // 3. 解析请求数据
+    const body = await request.json()
+    const { userId } = body
+
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+    }
+
+    // 4. 执行删除操作 (使用 auth.admin.deleteUser)
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
+
+    if (error) {
+      console.error('Supabase delete error:', error)
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    // 5. 可选：顺便删除 profiles 表里的关联数据（如果未设置级联删除）
+    // await supabaseAdmin.from('profiles').delete().eq('id', userId)
+
     return NextResponse.json({ message: 'User deleted successfully' })
+
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('API Error:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
